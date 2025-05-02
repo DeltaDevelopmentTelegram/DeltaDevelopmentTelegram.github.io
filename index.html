@@ -1,71 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Delta Tapping Game</title>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background-color: black;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-family: Arial, sans-serif;
-    user-select: none;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Delta Tapping Game</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-family: Arial, sans-serif;
+      user-select: none;
+    }
 
-  #delta-display {
-    font-size: 2rem;
-    margin-bottom: 40px;
-  }
+    #delta-display {
+      font-size: 2rem;
+      margin-bottom: 40px;
+    }
 
-  #tap-circle {
-    width: 150px;
-    height: 150px;
-    background-color: black;
-    border: 3px solid white;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 5rem;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-    box-sizing: border-box;
-    position: relative;
-  }
+    #tap-circle {
+      width: 150px;
+      height: 150px;
+      background-color: black;
+      border: 3px solid white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 5rem;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      box-sizing: border-box;
+      position: relative;
+    }
 
-  #tap-circle.disabled {
-    cursor: default;
-    opacity: 0.6;
-  }
+    #tap-circle.disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
 
-  #taps-left {
-    margin-top: 20px;
-    font-size: 1.2rem;
-  }
+    #taps-left {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
 
-  #save-button {
-    margin-top: 20px;
-    padding: 8px 16px;
-    font-size: 1.1rem;
-    background-color: white;
-    color: black;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.2s ease;
-  }
-  #save-button:hover {
-    background-color: #ddd;
-  }
-</style>
+    #save-button {
+      margin-top: 20px;
+      padding: 8px 16px;
+      font-size: 1.1rem;
+      background-color: white;
+      color: black;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+    #save-button:hover {
+      background-color: #ddd;
+    }
+  </style>
 </head>
 <body>
   <div id="delta-display">DELTA: 0.000</div>
@@ -74,97 +74,102 @@
   <button id="save-button">Save Progress</button>
 
 <script>
-  (function() {
-    const tapCircle = document.getElementById('tap-circle');
-    const deltaDisplay = document.getElementById('delta-display');
-    const tapsLeftDisplay = document.getElementById('taps-left');
-    const saveBtn = document.getElementById('save-button');
+(function() {
+  const tapCircle = document.getElementById('tap-circle');
+  const deltaDisplay = document.getElementById('delta-display');
+  const tapsLeftDisplay = document.getElementById('taps-left');
+  const saveBtn = document.getElementById('save-button');
 
-    let deltaAmount = 0;
-    let tapsLeft = 500;
-    let intervalId = null;
+  let deltaAmount = 0;
+  let tapsLeft = 500;
+  const maxTaps = 500;
+  let intervalId = null;
 
-    // Load saved data from localStorage
-    function loadProgress() {
-      const savedDelta = localStorage.getItem('deltaAmount');
-      const savedTaps = localStorage.getItem('tapsLeft');
+  function updateDeltaDisplay() {
+    deltaDisplay.textContent = 'DELTA: ' + deltaAmount.toFixed(3);
+  }
 
-      if (savedDelta !== null && !isNaN(parseFloat(savedDelta))) {
-        deltaAmount = parseFloat(savedDelta);
-      }
-      if (savedTaps !== null && !isNaN(parseInt(savedTaps, 10))) {
-        tapsLeft = parseInt(savedTaps, 10);
-      }
+  function updateTapsLeftDisplay() {
+    tapsLeftDisplay.textContent = 'Taps left: ' + tapsLeft;
+  }
 
-      updateDeltaDisplay();
+  function animateTap() {
+    tapCircle.style.transform = 'scale(0.6)';
+    setTimeout(() => {
+      tapCircle.style.transform = 'scale(1)';
+    }, 150);
+  }
+
+  function addDelta() {
+    deltaAmount += 0.001;
+    updateDeltaDisplay();
+  }
+
+  function handleTap() {
+    if (tapsLeft > 0) {
+      animateTap();
+      addDelta();
+      tapsLeft--;
       updateTapsLeftDisplay();
+    }
+  }
 
-      // If tapsLeft is 0, start auto replenish
-      if (tapsLeft === 0) {
-        startAutoReplenish();
-      }
+  function regenerateTaps() {
+    if (tapsLeft < maxTaps) {
+      tapsLeft++;
+      updateTapsLeftDisplay();
+    }
+  }
+
+  function startAutoReplenish() {
+    intervalId = setInterval(regenerateTaps, 2000); // Every 2 seconds
+  }
+
+  function saveProgress() {
+    localStorage.setItem('deltaAmount', deltaAmount.toString());
+    localStorage.setItem('tapsLeft', tapsLeft.toString());
+    localStorage.setItem('lastActive', Date.now().toString());
+    alert('Progress saved!');
+  }
+
+  function loadProgress() {
+    const savedDelta = localStorage.getItem('deltaAmount');
+    const savedTaps = localStorage.getItem('tapsLeft');
+    const lastTime = localStorage.getItem('lastActive');
+
+    if (savedDelta !== null && !isNaN(parseFloat(savedDelta))) {
+      deltaAmount = parseFloat(savedDelta);
+    }
+    if (savedTaps !== null && !isNaN(parseInt(savedTaps, 10))) {
+      tapsLeft = parseInt(savedTaps, 10);
     }
 
-    function animateTap() {
-      tapCircle.style.transform = 'scale(0.6)';
-      setTimeout(() => {
-        tapCircle.style.transform = 'scale(1)';
-      }, 150);
+    if (lastTime) {
+      const last = parseInt(lastTime, 10);
+      const now = Date.now();
+      const secondsPassed = Math.floor((now - last) / 1000);
+      const offlineTaps = Math.floor(secondsPassed / 2);
+      tapsLeft = Math.min(tapsLeft + offlineTaps, maxTaps);
     }
 
-    function updateDeltaDisplay() {
-      deltaDisplay.textContent = 'DELTA: ' + deltaAmount.toFixed(3);
+    updateDeltaDisplay();
+    updateTapsLeftDisplay();
+  }
+
+  tapCircle.addEventListener('click', handleTap);
+  tapCircle.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      handleTap();
     }
+  });
 
-    function updateTapsLeftDisplay() {
-      tapsLeftDisplay.textContent = 'Taps left: ' + tapsLeft;
-    }
+  saveBtn.addEventListener('click', saveProgress);
+  window.addEventListener('beforeunload', saveProgress);
 
-    function addDelta() {
-      deltaAmount += 0.001;
-      updateDeltaDisplay();
-    }
-
-    function handleTap() {
-      if (tapsLeft > 0) {
-        animateTap();
-        addDelta();
-        tapsLeft--;
-        updateTapsLeftDisplay();
-      }
-      if (tapsLeft === 0 && intervalId === null) {
-        startAutoReplenish();
-      }
-    }
-
-    function startAutoReplenish() {
-      tapCircle.classList.remove('disabled');
-
-      intervalId = setInterval(() => {
-        tapsLeft++;
-        updateTapsLeftDisplay();
-      }, 2000);
-    }
-
-    function saveProgress() {
-      localStorage.setItem('deltaAmount', deltaAmount.toString());
-      localStorage.setItem('tapsLeft', tapsLeft.toString());
-      alert('Progress saved!');
-    }
-
-    tapCircle.addEventListener('click', handleTap);
-
-    tapCircle.addEventListener('keydown', function(e) {
-      if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-        e.preventDefault();
-        handleTap();
-      }
-    });
-
-    saveBtn.addEventListener('click', saveProgress);
-
-    loadProgress();
-  })();
+  loadProgress();
+  startAutoReplenish();
+})();
 </script>
 </body>
 </html>
