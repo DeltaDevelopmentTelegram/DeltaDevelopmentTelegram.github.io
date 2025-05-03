@@ -78,7 +78,7 @@
 </head>
 <body>
   <div id="delta-display">DELTA: 0.000</div>
-  <div id="tap-circle" aria-label="Tap circle button" role="button" tabindex="0">$</div>
+  <div id="tap-circle" aria-label="Tap circle button" role="button" tabindex="0">∆</div>
   <div id="taps-left">Taps left: 500</div>
   <button id="save-button">Save Progress</button>
   <div id="save-message"></div>
@@ -92,9 +92,9 @@
     const saveMessage = document.getElementById('save-message');
 
     let deltaAmount = 0;
-    let tapsLeft = 500;
+    let tapsLeft = 1000;
     let intervalId = null;
-    const MAX_TAPS = 500;
+    const MAX_TAPS = 1000;
 
     function loadProgress() {
       const savedDelta = localStorage.getItem('deltaAmount');
