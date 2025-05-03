@@ -111,7 +111,7 @@
       // Calculate offline time and add taps
       if (lastActive) {
         const offlineTime = Date.now() - parseInt(lastActive, 10);
-        const offlineTaps = Math.floor(offlineTime / 2000);
+        const offlineTaps = Math.floor(offlineTime / 1000);
         tapsLeft = Math.min(MAX_TAPS, tapsLeft + offlineTaps);
       }
 
