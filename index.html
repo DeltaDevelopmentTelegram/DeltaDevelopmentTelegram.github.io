@@ -2,160 +2,447 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DELTA Network</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>DELTA Network Checkers</title>
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background-color: black;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-family: Arial, sans-serif;
-    user-select: none;
-  }
+  :root {
+    --board-size: 320px;
+    --square-size: calc(var(--board-size) / 8);
+    --black-square: #1b1b1b;
+    --gray-square: #a9a9a9;
+    --black-piece-color: #000000;
+    --gray-piece-color: #888888;
+    --highlight-color: #00ff99;
+    --select-color: #ffcc00;
+  }
 
-  #delta-display {
-    font-size: 2rem;
-    margin-bottom: 40px;
-  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #111;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+  }
 
-  #tap-circle {
-    width: 150px;
-    height: 150px;
-    background-color: black;
-    border: 3px solid white;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 5rem;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-    box-sizing: border-box;
-    position: relative;
-  }
+  #turnIndicator {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
 
-  #tap-circle.disabled {
-    cursor: default;
-    opacity: 0.6;
-  }
+  #board {
+    width: var(--board-size);
+    height: var(--board-size);
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    box-shadow: 0 0 10px #00ff99;
+    border: 4px solid #00ff99;
+    touch-action: manipulation;
+  }
 
-  #taps-left {
-    margin-top: 20px;
-    font-size: 1.2rem;
-  }
+  .square {
+    width: var(--square-size);
+    height: var(--square-size);
+  }
+
+  .square.black {
+    background-color: var(--black-square);
+  }
+
+  .square.gray {
+    background-color: var(--gray-square);
+  }
+
+  .square.highlight {
+    outline: 3px solid var(--highlight-color);
+    outline-offset: -3px;
+  }
+
+  .square.select {
+    outline: 3px solid var(--select-color);
+    outline-offset: -3px;
+  }
+
+  .piece {
+    width: var(--square-size);
+    height: var(--square-size);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 900;
+    font-size: 1.6rem;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+    position: relative;
+  }
+
+  .piece.black {
+    background-color: var(--black-piece-color);
+    color: white;
+  }
+
+  .piece.gray {
+    background-color: var(--gray-piece-color);
+    color: #222222;
+  }
+
+  .piece.king::after {
+    content: "♔";
+    position: absolute;
+    font-size: 1.2rem;
+    top: 2px;
+    right: 6px;
+    color: gold;
+    text-shadow: 0 0 3px black;
+    pointer-events: none;
+  }
+
+  #controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #00aaff;
+    color: #111;
+    box-shadow: 0 0 6px #00aaff;
+    transition: background-color 0.25s ease;
+    user-select: none;
+  }
+
+  button:hover {
+    background-color: #0088cc;
+  }
+
+  /* Responsive */
+  @media (max-width: 400px) {
+    :root {
+      --board-size: 280px;
+      --square-size: calc(var(--board-size) / 8);
+    }
+    #turnIndicator {
+      font-size: 1.1rem;
+    }
+    button {
+      padding: 8px 18px;
+      font-size: 0.9rem;
+    }
+  }
 </style>
 </head>
 <body>
-  <div id="delta-display">DELTA: 0.000</div>
-  <div id="tap-circle" aria-label="Tap circle button" role="button" tabindex="0">∆</div>
-  <div id="taps-left">Taps left: 1000</div>
+  <div id="turnIndicator" aria-live="polite">Turn: Black (∆)</div>
+  <div id="board" role="grid" aria-label="Checkers board"></div>
+  <div id="controls">
+    <button id="resetBtn" aria-label="Reset game">Reset Game</button>
+  </div>
 
 <script>
-  (function() {
-    const tapCircle = document.getElementById('tap-circle');
-    const deltaDisplay = document.getElementById('delta-display');
-    const tapsLeftDisplay = document.getElementById('taps-left');
+  (function() {
+    const boardElem = document.getElementById('board');
+    const turnIndicator = document.getElementById('turnIndicator');
+    const resetBtn = document.getElementById('resetBtn');
 
-    let deltaAmount = 0;
-    let tapsLeft = 1000;
-    let intervalId = null;
-    const MAX_TAPS = 1000;
+    const SIZE = 8;
+    const BLACK = 'black';
+    const GRAY = 'gray';
+    const EMPTY = null;
 
-    function loadProgress() {
-      const savedDelta = localStorage.getItem('deltaAmount');
-      const savedTaps = localStorage.getItem('tapsLeft');
-      const lastActive = localStorage.getItem('lastActive');
+    let board = [];
+    let currentPlayer = BLACK;
+    let selectedPiece = null;
+    let possibleMoves = [];
+    let multiCaptureActive = false;
 
-      if (savedDelta !== null && !isNaN(parseFloat(savedDelta))) {
-        deltaAmount = parseFloat(savedDelta);
-      }
-      if (savedTaps !== null && !isNaN(parseInt(savedTaps, 10))) {
-        tapsLeft = parseInt(savedTaps, 10);
-      }
+    function initBoard() {
+      board = [];
+      for(let r=0; r<SIZE; r++) {
+        let row = [];
+        for(let c=0; c<SIZE; c++) {
+          if((r+c) % 2 ===1) {
+            if (r < 3) {
+              row.push({player: GRAY, isKing: false});
+            } else if (r > 4) {
+              row.push({player: BLACK, isKing: false});
+            } else {
+              row.push(EMPTY);
+            }
+          } else {
+            row.push(EMPTY);
+          }
+        }
+        board.push(row);
+      }
+    }
 
-      // Calculate offline time and add taps
-      if (lastActive) {
-        const offlineTime = Date.now() - parseInt(lastActive, 10);
-        const offlineTaps = Math.floor(offlineTime / 1000);
-        tapsLeft = Math.min(MAX_TAPS, tapsLeft + offlineTaps);
-      }
+    function renderBoard() {
+      boardElem.innerHTML = '';
+      for(let r=0; r<SIZE; r++) {
+        for(let c=0; c<SIZE; c++) {
+          const isBlackSquare = ((r+c) %2 ===1);
+          const squareDiv = document.createElement('div');
+          squareDiv.classList.add('square');
+          squareDiv.classList.add(isBlackSquare ? 'black' : 'gray');
+          squareDiv.setAttribute('data-row', r);
+          squareDiv.setAttribute('data-col', c);
+          squareDiv.setAttribute('role', 'gridcell');
 
-      updateDeltaDisplay();
-      updateTapsLeftDisplay();
+          if (selectedPiece && selectedPiece.row === r && selectedPiece.col === c) {
+            squareDiv.classList.add('select');
+          }
 
-      if (tapsLeft === 0) {
-        startAutoReplenish();
-      }
-    }
+          if (possibleMoves.some(m => m.toRow === r && m.toCol === c)) {
+            squareDiv.classList.add('highlight');
+          }
 
-    function animateTap() {
-      tapCircle.style.transform = 'scale(0.6)';
-      setTimeout(() => {
-        tapCircle.style.transform = 'scale(1)';
-      }, 150);
-    }
+          if (board[r][c]) {
+            const pieceDiv = document.createElement('div');
+            pieceDiv.classList.add('piece');
+            pieceDiv.classList.add(board[r][c].player);
 
-    function updateDeltaDisplay() {
-      deltaDisplay.textContent = 'DELTA: ' + deltaAmount.toFixed(3);
-    }
+            if (board[r][c].player === BLACK) {
+              pieceDiv.textContent = '∆';
+              pieceDiv.style.color = 'white';
+              pieceDiv.style.textShadow = '0 0 5px black';
+            } else if (board[r][c].player === GRAY) {
+              pieceDiv.textContent = '$';
+              pieceDiv.style.color = '#444';
+              pieceDiv.style.textShadow = '0 0 5px rgba(0,0,0,0.7)';
+            }
 
-    function updateTapsLeftDisplay() {
-      tapsLeftDisplay.textContent = 'Taps left: ' + tapsLeft;
-    }
+            if (board[r][c].isKing) {
+              pieceDiv.classList.add('king');
+            }
 
-    function addDelta() {
-      deltaAmount += 0.001;
-      updateDeltaDisplay();
-    }
+            squareDiv.appendChild(pieceDiv);
+          }
 
-    function saveProgress() {
-      localStorage.setItem('deltaAmount', deltaAmount.toString());
-      localStorage.setItem('tapsLeft', tapsLeft.toString());
-      localStorage.setItem('lastActive', Date.now().toString());
-    }
+          squareDiv.addEventListener('click', onSquareClick);
+          boardElem.appendChild(squareDiv);
+        }
+      }
+      updateTurnDisplay();
+    }
 
-    function handleTap() {
-      if (tapsLeft > 0) {
-        animateTap();
-        addDelta();
-        tapsLeft--;
-        updateTapsLeftDisplay();
-        saveProgress(); // Silent auto-save
-      }
-      if (tapsLeft === 0 && intervalId === null) {
-        startAutoReplenish();
-      }
-    }
+    function updateTurnDisplay() {
+      const playerSymbol = currentPlayer === BLACK ? '∆' : '$';
+      const playerName = currentPlayer === BLACK ? 'Black' : 'Grey';
+      if (multiCaptureActive) {
+        turnIndicator.textContent = `Turn: ${playerName} (${playerSymbol}) — Capture Again!`;
+      } else {
+        turnIndicator.textContent = `Turn: ${playerName} (${playerSymbol})`;
+      }
+    }
 
-    function startAutoReplenish() {
-      tapCircle.classList.remove('disabled');
-      if (intervalId) return;
+    function inBounds(r, c) {
+      return r >=0 && r < SIZE && c >= 0 && c < SIZE;
+    }
 
-      intervalId = setInterval(() => {
-        if (tapsLeft < MAX_TAPS) {
-          tapsLeft++;
-          updateTapsLeftDisplay();
-        }
-      }, 2000);
-    }
+    function getMovesForPiece(r, c) {
+      const moves = [];
+      if (!board[r][c] || board[r][c].player !== currentPlayer) return moves;
 
-    tapCircle.addEventListener('click', handleTap);
+      const piece = board[r][c];
+      const directions = [];
 
-    tapCircle.addEventListener('keydown', function(e) {
-      if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-        e.preventDefault();
-        handleTap();
-      }
-    });
+      if (piece.player === BLACK || piece.isKing) {
+        directions.push([-1, -1], [-1, 1]);
+      }
+      if (piece.player === GRAY || piece.isKing) {
+        directions.push([1, -1], [1, 1]);
+      }
 
-    loadProgress();
-  })();
+      for (let [dr, dc] of directions) {
+        const nr = r + dr;
+        const nc = c + dc;
+        if (inBounds(nr, nc)) {
+          if (board[nr][nc] === EMPTY) {
+            moves.push({toRow: nr, toCol: nc, isCapture: false});
+          } else if (board[nr][nc] && board[nr][nc].player !== currentPlayer) {
+            const jumpR = nr + dr;
+            const jumpC = nc + dc;
+            if (inBounds(jumpR, jumpC) && board[jumpR][jumpC] === EMPTY) {
+              moves.push({
+                toRow: jumpR,
+                toCol: jumpC,
+                isCapture: true,
+                captureRow: nr,
+                captureCol: nc
+              });
+            }
+          }
+        }
+      }
+      return moves;
+    }
+
+    function hasFurtherCaptures(r, c) {
+      const moves = getMovesForPiece(r, c);
+      return moves.some(m => m.isCapture);
+    }
+
+    // Added helper: count pieces for a player
+    function countPieces(player) {
+      let cnt = 0;
+      for (let r=0; r<SIZE; r++) {
+        for (let c=0; c<SIZE; c++) {
+          if (board[r][c] && board[r][c].player === player) {
+            cnt++;
+          }
+        }
+      }
+      return cnt;
+    }
+
+    function checkGameOver() {
+      for(let r=0; r<SIZE; r++) {
+        for(let c=0; c<SIZE; c++) {
+          if (board[r][c] && board[r][c].player === currentPlayer) {
+            if (getMovesForPiece(r,c).length > 0) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    function switchPlayer() {
+      currentPlayer = (currentPlayer === BLACK) ? GRAY : BLACK;
+      selectedPiece = null;
+      possibleMoves = [];
+      multiCaptureActive = false;
+    }
+
+    function onSquareClick(e) {
+      const square = e.currentTarget;
+      const r = parseInt(square.getAttribute('data-row'));
+      const c = parseInt(square.getAttribute('data-col'));
+
+      if (multiCaptureActive) {
+        if (r === selectedPiece.row && c === selectedPiece.col) {
+          return;
+        }
+
+        const move = possibleMoves.find(m => m.toRow === r && m.toCol === c && m.isCapture);
+        if (move) {
+          doMove(selectedPiece.row, selectedPiece.col, move);
+          return;
+        }
+        return;
+      }
+
+      if (!selectedPiece) {
+        if (board[r][c] && board[r][c].player === currentPlayer) {
+          selectedPiece = {row: r, col: c};
+          possibleMoves = getMovesForPiece(r, c);
+          renderBoard();
+        }
+        return;
+      } else {
+        if (selectedPiece.row === r && selectedPiece.col === c) {
+          selectedPiece = null;
+          possibleMoves = [];
+          renderBoard();
+          return;
+        }
+
+        const move = possibleMoves.find(m => m.toRow === r && m.toCol === c);
+        if (move) {
+          doMove(selectedPiece.row, selectedPiece.col, move);
+        } else if (board[r][c] && board[r][c].player === currentPlayer) {
+          selectedPiece = {row: r, col: c};
+          possibleMoves = getMovesForPiece(r, c);
+          renderBoard();
+        }
+      }
+    }
+
+    function doMove(fromR, fromC, move) {
+      const piece = board[fromR][fromC];
+      const toR = move.toRow;
+      const toC = move.toCol;
+
+      board[toR][toC] = piece;
+      board[fromR][fromC] = EMPTY;
+
+      if (move.isCapture) {
+        board[move.captureRow][move.captureCol] = EMPTY;
+      }
+
+      if (!piece.isKing) {
+        if (piece.player === BLACK && toR === 0) {
+          piece.isKing = true;
+        } else if (piece.player === GRAY && toR === SIZE - 1) {
+          piece.isKing = true;
+        }
+      }
+
+      // Check if opponent has pieces left (new)
+      const opponent = currentPlayer === BLACK ? GRAY : BLACK;
+      if (countPieces(opponent) === 0) {
+        alert(`Game over! ${currentPlayer === BLACK ? 'Black (∆)' : 'Grey ($)'} wins!`);
+        resetGame();
+        return;
+      }
+
+      if (move.isCapture && hasFurtherCaptures(toR, toC)) {
+        multiCaptureActive = true;
+        selectedPiece = {row: toR, col: toC};
+        possibleMoves = getMovesForPiece(toR, toC).filter(m => m.isCapture);
+        renderBoard();
+        updateTurnDisplay();
+        return;
+      }
+
+      multiCaptureActive = false;
+      selectedPiece = null;
+      possibleMoves = [];
+
+      if (checkGameOver()) {
+        alert(`Game over! ${opponent === BLACK ? 'Black (∆)' : 'Grey ($)'} wins!`);
+        resetGame();
+        return;
+      }
+
+      switchPlayer();
+      renderBoard();
+    }
+
+    function resetGame() {
+      initBoard();
+      currentPlayer = BLACK;
+      selectedPiece = null;
+      possibleMoves = [];
+      multiCaptureActive = false;
+      renderBoard();
+    }
+
+    resetBtn.addEventListener('click', () => {
+      resetGame();
+    });
+
+    resetGame();
+
+  })();
 </script>
 </body>
 </html>
+
