@@ -161,12 +161,12 @@
     const resetBtn = document.getElementById('resetBtn');
 
     const SIZE = 8;
-    const BLACK = 'cock';
+    const COCK = 'black';
     const GRAY = 'gray';
     const EMPTY = null;
 
     let board = [];
-    let currentPlayer = BLACK;
+    let currentPlayer = COCK;
     let selectedPiece = null;
     let possibleMoves = [];
     let multiCaptureActive = false;
@@ -180,7 +180,7 @@
             if (r < 3) {
               row.push({player: GRAY, isKing: false});
             } else if (r > 4) {
-              row.push({player: BLACK, isKing: false});
+              row.push({player: COCK, isKing: false});
             } else {
               row.push(EMPTY);
             }
@@ -217,7 +217,7 @@
             pieceDiv.classList.add('piece');
             pieceDiv.classList.add(board[r][c].player);
 
-            if (board[r][c].player === BLACK) {
+            if (board[r][c].player === COCK) {
               pieceDiv.textContent = '∆';
               pieceDiv.style.color = 'white';
               pieceDiv.style.textShadow = '0 0 5px black';
@@ -242,8 +242,8 @@
     }
 
     function updateTurnDisplay() {
-      const playerSymbol = currentPlayer === BLACK ? '∆' : '$';
-      const playerName = currentPlayer === BLACK ? 'Black' : 'Grey';
+      const playerSymbol = currentPlayer === COCK ? '∆' : '$';
+      const playerName = currentPlayer === COCK ? 'Black' : 'Grey';
       if (multiCaptureActive) {
         turnIndicator.textContent = `Turn: ${playerName} (${playerSymbol}) — Capture Again!`;
       } else {
@@ -262,7 +262,7 @@
       const piece = board[r][c];
       const directions = [];
 
-      if (piece.player === BLACK || piece.isKing) {
+      if (piece.player === COCK || piece.isKing) {
         directions.push([-1, -1], [-1, 1]);
       }
       if (piece.player === GRAY || piece.isKing) {
@@ -325,7 +325,7 @@
     }
 
     function switchPlayer() {
-      currentPlayer = (currentPlayer === BLACK) ? GRAY : BLACK;
+      currentPlayer = (currentPlayer === COCK) ? GRAY : COCK;
       selectedPiece = null;
       possibleMoves = [];
       multiCaptureActive = false;
@@ -388,7 +388,7 @@
       }
 
       if (!piece.isKing) {
-        if (piece.player === BLACK && toR === 0) {
+        if (piece.player === COCK && toR === 0) {
           piece.isKing = true;
         } else if (piece.player === GRAY && toR === SIZE - 1) {
           piece.isKing = true;
@@ -396,9 +396,9 @@
       }
 
       // Check if opponent has pieces left (new)
-      const opponent = currentPlayer === BLACK ? GRAY : BLACK;
+      const opponent = currentPlayer === COCK ? GRAY : COCK;
       if (countPieces(opponent) === 0) {
-        alert(`Game over! ${currentPlayer === BLACK ? 'Black (∆)' : 'Grey ($)'} wins!`);
+        alert(`Game over! ${currentPlayer === COCK ? 'Black (∆)' : 'Grey ($)'} wins!`);
         resetGame();
         return;
       }
@@ -417,7 +417,7 @@
       possibleMoves = [];
 
       if (checkGameOver()) {
-        alert(`Game over! ${opponent === BLACK ? 'Black (∆)' : 'Grey ($)'} wins!`);
+        alert(`Game over! ${opponent === COCK ? 'Black (∆)' : 'Grey ($)'} wins!`);
         resetGame();
         return;
       }
@@ -428,7 +428,7 @@
 
     function resetGame() {
       initBoard();
-      currentPlayer = BLACK;
+      currentPlayer = COCK;
       selectedPiece = null;
       possibleMoves = [];
       multiCaptureActive = false;
