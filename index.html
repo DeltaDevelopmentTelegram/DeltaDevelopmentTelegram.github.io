@@ -41,34 +41,26 @@
     justify-content: center;
     align-items: center;
     transition: transform 0.15s ease;
-    -webkit-tap-highlight-color: transparent; /* Disable mobile tap highlight */
+    -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
   #tap-button:active {
     transform: scale(0.85);
     transition: transform 0.1s ease;
   }
-  /* For smooth revert animation */
   .shrink {
     animation: shrinkBounce 0.2s forwards;
   }
-
   @keyframes shrinkBounce {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(0.85);
-    }
-    100% {
-      transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(0.85); }
+    100% { transform: scale(1); }
   }
 </style>
 </head>
 <body>
   <div id="balance">DELTA: 0.000</div>
-  <button id="tap-button" aria-label="Tap to earn QUACKs">$</button>
+  <button id="tap-button" aria-label="Tap to earn DELTA">$</button>
 
 <script>
   (function(){
@@ -76,53 +68,48 @@
     const tapButton = document.getElementById('tap-button');
 
     // Load balance from localStorage or default to 0
-    let quackBalance = parseFloat(localStorage.getItem('quackBalance'));
-    if (isNaN(quackBalance)) quackBalance = 0;
+    let deltaBalance = parseFloat(localStorage.getItem('deltaBalance'));
+    if (isNaN(deltaBalance)) deltaBalance = 0;
 
-    // Helper: format with 3 decimals fixed
-    function formatQuack(amount) {
+    // Format with 3 decimals
+    function formatDelta(amount) {
       return amount.toFixed(3);
     }
 
     // Update balance display
     function updateBalanceDisplay() {
-      balanceDisplay.textContent = 'QUACK: ' + formatQuack(quackBalance);
+      balanceDisplay.textContent = 'DELTA: ' + formatDelta(deltaBalance);
     }
 
     updateBalanceDisplay();
 
-    // Throttle saving balance to localStorage every 1 second
+    // Throttle saving
     let saveTimeout;
     function scheduleSave() {
-      if (saveTimeout) return; // already scheduled
+      if (saveTimeout) return;
       saveTimeout = setTimeout(() => {
-        localStorage.setItem('quackBalance', quackBalance.toString());
+        localStorage.setItem('deltaBalance', deltaBalance.toString());
         saveTimeout = null;
       }, 1000);
     }
 
-    // Handle tap logic
+    // Tap logic
     tapButton.addEventListener('click', () => {
-      // Increment balance
-      DELTABalance += 0.001;
-
+      deltaBalance += 0.001;
       updateBalanceDisplay();
 
-      // Animate button shrink manually for consistency on all browsers
       tapButton.classList.remove('shrink');
-      // Trigger reflow to restart animation
       void tapButton.offsetWidth;
       tapButton.classList.add('shrink');
 
       scheduleSave();
     });
 
-    // On page unload save balance immediately
+    // Save on unload
     window.addEventListener('beforeunload', () => {
-      localStorage.setItem('quackBalance', quackBalance.toString());
+      localStorage.setItem('deltaBalance', deltaBalance.toString());
     });
   })();
 </script>
 </body>
 </html>
-
