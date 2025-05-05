@@ -3,444 +3,124 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>DELTA Network Checkers</title>
+<title>DELTA Network</title>
 <style>
-  :root {
-    --board-size: 320px;
-    --square-size: calc(var(--board-size) / 8);
-    --black-square: #1b1b1b;
-    --gray-square: #a9a9a9;
-    --black-piece-color: #000000;
-    --gray-piece-color: #888888;
-    --highlight-color: #00ff99;
-    --select-color: #ffcc00;
+  /* Reset and base styling */
+  * {
+    box-sizing: border-box;
   }
-
   body, html {
-    margin: 0; padding: 0; height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    background-color: #111;
+    margin: 0;
+    padding: 0;
+    background: black;
+    height: 100%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    user-select: none;
-  }
-
-  #turnIndicator {
-    font-size: 1.3rem;
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
-
-  #board {
-    width: var(--board-size);
-    height: var(--board-size);
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    box-shadow: 0 0 10px #00ff99;
-    border: 4px solid #00ff99;
-    touch-action: manipulation;
-  }
-
-  .square {
-    width: var(--square-size);
-    height: var(--square-size);
-  }
-
-  .square.black {
-    background-color: var(--black-square);
-  }
-
-  .square.gray {
-    background-color: var(--gray-square);
-  }
-
-  .square.highlight {
-    outline: 3px solid var(--highlight-color);
-    outline-offset: -3px;
-  }
-
-  .square.select {
-    outline: 3px solid var(--select-color);
-    outline-offset: -3px;
-  }
-
-  .piece {
-    width: var(--square-size);
-    height: var(--square-size);
-    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
-    user-select: none;
-    font-weight: 900;
-    font-size: 1.6rem;
-    text-shadow: 0 0 3px rgba(0,0,0,0.8);
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
-    position: relative;
+    flex-direction: column;
   }
-
-  .piece.black {
-    background-color: var(--black-piece-color);
+  #balance {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    user-select: none;
+    letter-spacing: 0.05em;
+  }
+  #tap-button {
+    background: black;
+    border: 4px solid white;
+    border-radius: 50%;
+    width: 140px;
+    height: 140px;
     color: white;
-  }
-
-  .piece.gray {
-    background-color: var(--gray-piece-color);
-    color: #222222;
-  }
-
-  .piece.king::after {
-    content: "♔";
-    position: absolute;
-    font-size: 1.2rem;
-    top: 2px;
-    right: 6px;
-    color: gold;
-    text-shadow: 0 0 3px black;
-    pointer-events: none;
-  }
-
-  #controls {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-  }
-
-  button {
-    padding: 10px 22px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 6px;
-    border: none;
+    font-size: 3.5rem;
     cursor: pointer;
-    background-color: #00aaff;
-    color: #111;
-    box-shadow: 0 0 6px #00aaff;
-    transition: background-color 0.25s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent; /* Disable mobile tap highlight */
     user-select: none;
   }
-
-  button:hover {
-    background-color: #0088cc;
+  #tap-button:active {
+    transform: scale(0.85);
+    transition: transform 0.1s ease;
+  }
+  /* For smooth revert animation */
+  .shrink {
+    animation: shrinkBounce 0.2s forwards;
   }
 
-  /* Responsive */
-  @media (max-width: 400px) {
-    :root {
-      --board-size: 280px;
-      --square-size: calc(var(--board-size) / 8);
+  @keyframes shrinkBounce {
+    0% {
+      transform: scale(1);
     }
-    #turnIndicator {
-      font-size: 1.1rem;
+    50% {
+      transform: scale(0.85);
     }
-    button {
-      padding: 8px 18px;
-      font-size: 0.9rem;
+    100% {
+      transform: scale(1);
     }
   }
 </style>
 </head>
 <body>
-  <div id="turnIndicator" aria-live="polite">Turn: Black (∆)</div>
-  <div id="board" role="grid" aria-label="Checkers board"></div>
-  <div id="controls">
-    <button id="resetBtn" aria-label="Reset game">Reset Game</button>
-  </div>
+  <div id="balance">QUACK: 0.000</div>
+  <button id="tap-button" aria-label="Tap to earn QUACKs">$</button>
 
 <script>
-  (function() {
-    const boardElem = document.getElementById('board');
-    const turnIndicator = document.getElementById('turnIndicator');
-    const resetBtn = document.getElementById('resetBtn');
+  (function(){
+    const balanceDisplay = document.getElementById('balance');
+    const tapButton = document.getElementById('tap-button');
 
-    const SIZE = 8;
-    const COCK = 'black';
-    const GRAY = 'gray';
-    const EMPTY = null;
+    // Load balance from localStorage or default to 0
+    let quackBalance = parseFloat(localStorage.getItem('quackBalance'));
+    if (isNaN(quackBalance)) quackBalance = 0;
 
-    let board = [];
-    let currentPlayer = COCK;
-    let selectedPiece = null;
-    let possibleMoves = [];
-    let multiCaptureActive = false;
-
-    function initBoard() {
-      board = [];
-      for(let r=0; r<SIZE; r++) {
-        let row = [];
-        for(let c=0; c<SIZE; c++) {
-          if((r+c) % 2 ===1) {
-            if (r < 3) {
-              row.push({player: GRAY, isKing: false});
-            } else if (r > 4) {
-              row.push({player: COCK, isKing: false});
-            } else {
-              row.push(EMPTY);
-            }
-          } else {
-            row.push(EMPTY);
-          }
-        }
-        board.push(row);
-      }
+    // Helper: format with 3 decimals fixed
+    function formatQuack(amount) {
+      return amount.toFixed(3);
     }
 
-    function renderBoard() {
-      boardElem.innerHTML = '';
-      for(let r=0; r<SIZE; r++) {
-        for(let c=0; c<SIZE; c++) {
-          const isBlackSquare = ((r+c) %2 ===1);
-          const squareDiv = document.createElement('div');
-          squareDiv.classList.add('square');
-          squareDiv.classList.add(isBlackSquare ? 'black' : 'gray');
-          squareDiv.setAttribute('data-row', r);
-          squareDiv.setAttribute('data-col', c);
-          squareDiv.setAttribute('role', 'gridcell');
-
-          if (selectedPiece && selectedPiece.row === r && selectedPiece.col === c) {
-            squareDiv.classList.add('select');
-          }
-
-          if (possibleMoves.some(m => m.toRow === r && m.toCol === c)) {
-            squareDiv.classList.add('highlight');
-          }
-
-          if (board[r][c]) {
-            const pieceDiv = document.createElement('div');
-            pieceDiv.classList.add('piece');
-            pieceDiv.classList.add(board[r][c].player);
-
-            if (board[r][c].player === COCK) {
-              pieceDiv.textContent = '∆';
-              pieceDiv.style.color = 'white';
-              pieceDiv.style.textShadow = '0 0 5px black';
-            } else if (board[r][c].player === GRAY) {
-              pieceDiv.textContent = '$';
-              pieceDiv.style.color = '#444';
-              pieceDiv.style.textShadow = '0 0 5px rgba(0,0,0,0.7)';
-            }
-
-            if (board[r][c].isKing) {
-              pieceDiv.classList.add('king');
-            }
-
-            squareDiv.appendChild(pieceDiv);
-          }
-
-          squareDiv.addEventListener('click', onSquareClick);
-          boardElem.appendChild(squareDiv);
-        }
-      }
-      updateTurnDisplay();
+    // Update balance display
+    function updateBalanceDisplay() {
+      balanceDisplay.textContent = 'QUACK: ' + formatQuack(quackBalance);
     }
 
-    function updateTurnDisplay() {
-      const playerSymbol = currentPlayer === COCK ? '∆' : '$';
-      const playerName = currentPlayer === COCK ? 'Black' : 'Grey';
-      if (multiCaptureActive) {
-        turnIndicator.textContent = `Turn: ${playerName} (${playerSymbol}) — Capture Again!`;
-      } else {
-        turnIndicator.textContent = `Turn: ${playerName} (${playerSymbol})`;
-      }
+    updateBalanceDisplay();
+
+    // Throttle saving balance to localStorage every 1 second
+    let saveTimeout;
+    function scheduleSave() {
+      if (saveTimeout) return; // already scheduled
+      saveTimeout = setTimeout(() => {
+        localStorage.setItem('quackBalance', quackBalance.toString());
+        saveTimeout = null;
+      }, 1000);
     }
 
-    function inBounds(r, c) {
-      return r >=0 && r < SIZE && c >= 0 && c < SIZE;
-    }
+    // Handle tap logic
+    tapButton.addEventListener('click', () => {
+      // Increment balance
+      quackBalance += 0.001;
 
-    function getMovesForPiece(r, c) {
-      const moves = [];
-      if (!board[r][c] || board[r][c].player !== currentPlayer) return moves;
+      updateBalanceDisplay();
 
-      const piece = board[r][c];
-      const directions = [];
+      // Animate button shrink manually for consistency on all browsers
+      tapButton.classList.remove('shrink');
+      // Trigger reflow to restart animation
+      void tapButton.offsetWidth;
+      tapButton.classList.add('shrink');
 
-      if (piece.player === COCK || piece.isKing) {
-        directions.push([-1, -1], [-1, 1]);
-      }
-      if (piece.player === GRAY || piece.isKing) {
-        directions.push([1, -1], [1, 1]);
-      }
-
-      for (let [dr, dc] of directions) {
-        const nr = r + dr;
-        const nc = c + dc;
-        if (inBounds(nr, nc)) {
-          if (board[nr][nc] === EMPTY) {
-            moves.push({toRow: nr, toCol: nc, isCapture: false});
-          } else if (board[nr][nc] && board[nr][nc].player !== currentPlayer) {
-            const jumpR = nr + dr;
-            const jumpC = nc + dc;
-            if (inBounds(jumpR, jumpC) && board[jumpR][jumpC] === EMPTY) {
-              moves.push({
-                toRow: jumpR,
-                toCol: jumpC,
-                isCapture: true,
-                captureRow: nr,
-                captureCol: nc
-              });
-            }
-          }
-        }
-      }
-      return moves;
-    }
-
-    function hasFurtherCaptures(r, c) {
-      const moves = getMovesForPiece(r, c);
-      return moves.some(m => m.isCapture);
-    }
-
-    // Added helper: count pieces for a player
-    function countPieces(player) {
-      let cnt = 0;
-      for (let r=0; r<SIZE; r++) {
-        for (let c=0; c<SIZE; c++) {
-          if (board[r][c] && board[r][c].player === player) {
-            cnt++;
-          }
-        }
-      }
-      return cnt;
-    }
-
-    function checkGameOver() {
-      for(let r=0; r<SIZE; r++) {
-        for(let c=0; c<SIZE; c++) {
-          if (board[r][c] && board[r][c].player === currentPlayer) {
-            if (getMovesForPiece(r,c).length > 0) {
-              return false;
-            }
-          }
-        }
-      }
-      return true;
-    }
-
-    function switchPlayer() {
-      currentPlayer = (currentPlayer === COCK) ? GRAY : COCK;
-      selectedPiece = null;
-      possibleMoves = [];
-      multiCaptureActive = false;
-    }
-
-    function onSquareClick(e) {
-      const square = e.currentTarget;
-      const r = parseInt(square.getAttribute('data-row'));
-      const c = parseInt(square.getAttribute('data-col'));
-
-      if (multiCaptureActive) {
-        if (r === selectedPiece.row && c === selectedPiece.col) {
-          return;
-        }
-
-        const move = possibleMoves.find(m => m.toRow === r && m.toCol === c && m.isCapture);
-        if (move) {
-          doMove(selectedPiece.row, selectedPiece.col, move);
-          return;
-        }
-        return;
-      }
-
-      if (!selectedPiece) {
-        if (board[r][c] && board[r][c].player === currentPlayer) {
-          selectedPiece = {row: r, col: c};
-          possibleMoves = getMovesForPiece(r, c);
-          renderBoard();
-        }
-        return;
-      } else {
-        if (selectedPiece.row === r && selectedPiece.col === c) {
-          selectedPiece = null;
-          possibleMoves = [];
-          renderBoard();
-          return;
-        }
-
-        const move = possibleMoves.find(m => m.toRow === r && m.toCol === c);
-        if (move) {
-          doMove(selectedPiece.row, selectedPiece.col, move);
-        } else if (board[r][c] && board[r][c].player === currentPlayer) {
-          selectedPiece = {row: r, col: c};
-          possibleMoves = getMovesForPiece(r, c);
-          renderBoard();
-        }
-      }
-    }
-
-    function doMove(fromR, fromC, move) {
-      const piece = board[fromR][fromC];
-      const toR = move.toRow;
-      const toC = move.toCol;
-
-      board[toR][toC] = piece;
-      board[fromR][fromC] = EMPTY;
-
-      if (move.isCapture) {
-        board[move.captureRow][move.captureCol] = EMPTY;
-      }
-
-      if (!piece.isKing) {
-        if (piece.player === COCK && toR === 0) {
-          piece.isKing = true;
-        } else if (piece.player === GRAY && toR === SIZE - 1) {
-          piece.isKing = true;
-        }
-      }
-
-      // Check if opponent has pieces left (new)
-      const opponent = currentPlayer === COCK ? GRAY : COCK;
-      if (countPieces(opponent) === 0) {
-        alert(`Game over! ${currentPlayer === COCK ? 'Black (∆)' : 'Grey ($)'} wins!`);
-        resetGame();
-        return;
-      }
-
-      if (move.isCapture && hasFurtherCaptures(toR, toC)) {
-        multiCaptureActive = true;
-        selectedPiece = {row: toR, col: toC};
-        possibleMoves = getMovesForPiece(toR, toC).filter(m => m.isCapture);
-        renderBoard();
-        updateTurnDisplay();
-        return;
-      }
-
-      multiCaptureActive = false;
-      selectedPiece = null;
-      possibleMoves = [];
-
-      if (checkGameOver()) {
-        alert(`Game over! ${opponent === COCK ? 'Black (∆)' : 'Grey ($)'} wins!`);
-        resetGame();
-        return;
-      }
-
-      switchPlayer();
-      renderBoard();
-    }
-
-    function resetGame() {
-      initBoard();
-      currentPlayer = COCK;
-      selectedPiece = null;
-      possibleMoves = [];
-      multiCaptureActive = false;
-      renderBoard();
-    }
-
-    resetBtn.addEventListener('click', () => {
-      resetGame();
+      scheduleSave();
     });
 
-    resetGame();
-
+    // On page unload save balance immediately
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('quackBalance', quackBalance.toString());
+    });
   })();
 </script>
 </body>
