@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="manifest.json"> <!-- Manifest link -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DELTA Network (Airdrop Eligibility: Confirmed)</title>
@@ -127,17 +126,6 @@
     <button id="installButton">Install App</button>
 
     <script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/worker.js') // Path to worker.js
-                .then((registration) => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                })
-                .catch((error) => {
-                    console.error('Service Worker registration failed:', error);
-                });
-        }
-
         let taps = parseInt(localStorage.getItem('taps')) || 0;
         const deltaPrice = 0.001;
         let deferredPrompt;
