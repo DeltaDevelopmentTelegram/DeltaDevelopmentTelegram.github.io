@@ -109,6 +109,15 @@
     </div>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/worker.js')  // Path to the worker.js file
+                .then((registration) => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch((error) => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        }
         let taps = parseInt(localStorage.getItem('taps')) || 0;
         const deltaPrice = 0.001;
 
