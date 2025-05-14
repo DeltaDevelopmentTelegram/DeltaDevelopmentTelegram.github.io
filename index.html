@@ -1,354 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>DELTA Network</title>
-<style>
-  /* Reset and base styling */
-  * {
-    box-sizing: border-box;
-  }
-  body, html {
-    margin: 0;
-    padding: 0;
-    background: #000000;
-    height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #FFFFFF;
-    overflow: hidden;
-  }
-  /* Centering tap button vertically and horizontally */
-  #app-container {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* vertical center */
-    align-items: center; /* horizontal center */
-    position: relative;
-  }
-  #balance {
-    user-select: none;
-    font-weight: 700;
-    font-size: 2rem;
-    letter-spacing: 0.07em;
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  #tap-button {
-    background: #000000;
-    border: 5px solid #ffffff;
-    border-radius: 50%;
-    width: 160px;
-    height: 160px;
-    color: #ffffff;
-    font-size: 4rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.15s ease;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    box-shadow: 0 0 25px rgba(255 255 255 / 0.2);
-    margin: 0 auto;
-    flex-shrink: 0;
-  }
-  #tap-button:active {
-    transform: scale(0.85);
-    transition: transform 0.1s ease;
-  }
-  .shrink {
-    animation: shrinkBounce 0.2s forwards;
-  }
-  @keyframes shrinkBounce {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.85); }
-    100% { transform: scale(1); }
-  }
-  /* Wallet button fixed at bottom center */
-  #wallet-button {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #111111;
-    border: 2.5px solid #ffffff;
-    border-radius: 12px;
-    color: #ffffff;
-    padding: 12px 38px;
-    font-size: 1.3rem;
-    cursor: pointer;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    user-select: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(255 255 255 / 0.15);
-    z-index: 9000;
-  }
-  #wallet-button:hover {
-    background: #ffffff;
-    color: #000000;
-    box-shadow: 0 0 25px #ffffff;
-  }
-
-  /* Fullscreen wallet overlay panel */
-  #wallet-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #111111;
-    color: #f9f9f9;
-    display: none;
-    flex-direction: column;
-    padding: 20px 25px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    z-index: 10000;
-  }
-  #wallet-modal.open {
-    display: flex;
-  }
-  /* Close button top right */
-  #wallet-close {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: transparent;
-    border: 2.5px solid #ffffff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    color: #ffffff;
-    font-size: 1.5rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background 0.3s, color 0.3s;
-    z-index: 11000;
-    user-select: none;
-  }
-  #wallet-close:hover {
-    background: #ffffff;
-    color: #000000;
-  }
-
-  #wallet-modal h2 {
-    margin-top: 60px; /* space for close btn */
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 2rem;
-    letter-spacing: 0.065em;
-    text-align: center;
-    margin-bottom: 30px;
-    user-select:none;
-  }
-  .wallet-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    font-size: 1.5rem;
-    border-bottom: 1px solid rgba(255 255 255 / 0.15);
-    padding-bottom: 12px;
-  }
-  .wallet-item:last-child {
-    margin-bottom: 0;
-    border-bottom: none;
-  }
-  .currency-info {
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
-  }
-  .currency-icon {
-    width: 30px;
-    height: 30px;
-    fill: #ffffff;
-    user-select:none;
-  }
-  .currency-symbol {
-    font-weight: 700;
-    font-size: 1.8rem;
-    width: 40px;
-    color: #eeeeee;
-    margin-left: 14px;
-    user-select:none;
-  }
-  .currency-name {
-    padding-left: 14px;
-    color: #cccccc;
-    user-select:none;
-    font-weight: 700;
-  }
-  .currency-balance {
-    font-weight: 700;
-    font-family: 'Courier New', Courier, monospace;
-    color: #fff;
-    min-width: 110px;
-    text-align: right;
-    user-select:none;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DELTA Network (Airdrop Available)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #tapButton {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #000000;
+            color: #1E90FF;
+            border: 2px solid #1E90FF;
+            font-size: 36px;
+            cursor: pointer;
+            transition: transform 0.25s ease;
+        }
+        #tapButton:hover {
+            background-color: #1E90FF;
+            color: #000000;
+        }
+        #walletButton {
+            margin-top: 20px;
+            background-color: #1E90FF;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        #walletButton:hover {
+            background-color: #00BFFF;
+        }
+        #wallet {
+            display: none;
+            width: 300px;
+            height: 400px;
+            background-color: #111111;
+            border: 2px solid #1E90FF;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px;
+            box-sizing: border-box;
+            color: white;
+            font-size: 16px;
+            overflow: hidden;
+        }
+        #closeWallet {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        #closeWallet:hover {
+            color: #FF6347;
+        }
+        .walletHeader {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        #cryptoPrices {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        #deltaAmount {
+            font-size: 20px;
+            color: #1E90FF;
+        }
+        #tapCount {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <div id="app-container" aria-label="Delta tap app">
-    <div id="balance" aria-live="polite" aria-atomic="true" aria-label="DELTA balance">DELTA: 0.000</div>
-    <button id="tap-button" aria-label="Tap to earn DELTA">$</button>
-  </div>
 
-  <button id="wallet-button" aria-expanded="false" aria-controls="wallet-modal" aria-label="Open Wallet">Wallet</button>
-
-  <section id="wallet-modal" role="dialog" aria-modal="true" aria-labelledby="wallet-title" aria-describedby="wallet-desc">
-    <button id="wallet-close" aria-label="Close Wallet">&times;</button>
-    <h2 id="wallet-title">Wallet</h2>
-    <div id="wallet-desc" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
-      Your current balances for DELTA, Bitcoin, Binance Coin, Ethereum
+    <h1>Tap to Mine Delta</h1>
+    
+    <button id="tapButton" onclick="tap()">∆</button>
+    
+    <p id="tapCount">Total Taps: 0</p>
+    
+    <button id="walletButton" onclick="openWallet()">Open Wallet</button>
+    
+    <div id="wallet">
+        <button id="closeWallet" onclick="closeWallet()">X</button>
+        <div class="walletHeader">Wallet</div>
+        <div id="deltaAmount">Delta: 0.0000 USD</div>
+        <div id="cryptoPrices">
+            <p>Loading crypto prices...</p>
+        </div>
     </div>
 
-    <div class="wallet-item" aria-label="DELTA Balance">
-      <div class="currency-info">
-        <svg class="currency-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M12 2L15 14H9L12 22L15 10H9L12 2Z" />
-        </svg>
-        <div class="currency-symbol">Δ</div>
-        <div class="currency-name">DELTA</div>
-      </div>
-      <div class="currency-balance" id="delta-balance">0.000</div>
-    </div>
+    <script>
+        let taps = 0;
+        const deltaPrice = 0.0001;
 
-    <div class="wallet-item" aria-label="Bitcoin Balance">
-      <div class="currency-info">
-        <svg class="currency-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" >
-          <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none" />
-          <path d="M12.5 7v10m-1-12v10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M14 8H9v2h4c1.1 0 2-.89 2-2s-.9-2-2-2zm-3 6H8v-2h3c1.1 0 2 .9 2 2s-.9 2-2 2z" fill="white"/>
-        </svg>
-        <div class="currency-symbol">₿</div>
-        <div class="currency-name">Bitcoin (BTC)</div>
-      </div>
-      <div class="currency-balance" id="btc-balance">0.00000</div>
-    </div>
+        // Function to update crypto prices using CoinGecko API
+        async function getCryptoPrices() {
+            try {
+                // Fetching the CoinGecko API data for multiple coins
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,pepe,shiba-inu,the-open-network,dogecoin&vs_currencies=usd');
+                
+                // Checking if the response is valid
+                if (!response.ok) {
+                    throw new Error('Failed to fetch crypto prices');
+                }
 
-    <div class="wallet-item" aria-label="Binance Coin Balance">
-      <div class="currency-info">
-        <svg class="currency-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" >
-          <polygon stroke="white" stroke-width="2" fill="none" points="12 2 2 12 12 22 22 12 12 2"/>
-          <polygon fill="white" points="12 5 7 12 12 19 17 12 12 5"/>
-        </svg>
-        <div class="currency-symbol">Ⓑ</div>
-        <div class="currency-name">Binance Coin (BNB)</div>
-      </div>
-      <div class="currency-balance" id="bnb-balance">0.00000</div>
-    </div>
+                const data = await response.json();
+                
+                // Extracting the values for the cryptocurrencies
+                const btcPrice = data.bitcoin.usd || 'N/A';
+                const ethPrice = data.ethereum.usd || 'N/A';
+                const bnbPrice = data.binancecoin.usd || 'N/A';
+                const pepePrice = data.pepe?.usd || 'N/A'; // Corrected to use 'pepe'
+                const shibaPrice = data['shiba-inu']?.usd || 'N/A'; // Shiba Inu price
+                const tonPrice = data['the-open-network']?.usd || 'N/A'; // TON price
+                const dogePrice = data.dogecoin.usd || 'N/A';
 
-    <div class="wallet-item" aria-label="Ethereum Balance">
-      <div class="currency-info">
-        <svg class="currency-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" >
-          <polygon fill="white" points="12 2 7 12 12 9 17 12 12 2"/>
-          <polygon fill="white" opacity="0.7" points="12 14 7 12 12 22 17 12 12 14"/>
-        </svg>
-        <div class="currency-symbol">Ξ</div>
-        <div class="currency-name">Ethereum (ETH)</div>
-      </div>
-      <div class="currency-balance" id="eth-balance">0.00000</div>
-    </div>
-  </section>
+                // Update the wallet with the real-time prices
+                document.getElementById('cryptoPrices').innerHTML = `
+                    <p>Bitcoin: $${btcPrice}</p>
+                    <p>Ethereum: $${ethPrice}</p>
+                    <p>Binance Coin: $${bnbPrice}</p>
+                    <p>Pepe Coin: $${pepePrice}</p>
+                    <p>Shiba Inu: $${shibaPrice}</p>
+                    <p>TON (The Open Network): $${tonPrice}</p>
+                    <p>Dogecoin: $${dogePrice}</p>
+                `;
+            } catch (error) {
+                console.error('Error fetching crypto prices:', error);
+                document.getElementById('cryptoPrices').innerHTML = `<p>Error loading prices.</p>`;
+            }
+        }
 
-<script>
-  (function(){
-    const balanceDisplay = document.getElementById('balance');
-    const tapButton = document.getElementById('tap-button');
-    const walletButton = document.getElementById('wallet-button');
-    const walletModal = document.getElementById('wallet-modal');
-    const walletClose = document.getElementById('wallet-close');
+        // Function to update Delta balance on tap
+        function tap() {
+            taps += 1;
+            document.getElementById('tapCount').innerText = `Total Taps: ${taps}`;
+            document.getElementById('deltaAmount').innerText = `Delta: ${(taps * deltaPrice).toFixed(4)} USD`;
 
-    const deltaBalanceDisplay = document.getElementById('delta-balance');
-    const btcBalanceDisplay = document.getElementById('btc-balance');
-    const bnbBalanceDisplay = document.getElementById('bnb-balance');
-    const ethBalanceDisplay = document.getElementById('eth-balance');
+            // Add scale down effect on button tap
+            const button = document.getElementById('tapButton');
+            button.style.transform = 'scale(0.8)'; // Shrink the button to 80%
+            
+            // Reset the transform after the animation
+            setTimeout(() => {
+                button.style.transform = 'scale(1)'; // Reset back to original size
+            }, 250); // Duration of the shrinking animation
+        }
 
-    // Load DELTA balance from localStorage or default to 0
-    let deltaBalance = parseFloat(localStorage.getItem('deltaBalance'));
-    if (isNaN(deltaBalance)) deltaBalance = 0;
+        // Function to open wallet
+        function openWallet() {
+            document.getElementById('wallet').style.display = 'block';
+            getCryptoPrices(); // Fetch and display real-time crypto prices when the wallet is opened
+        }
 
-    // Other balances fixed to zero
-    const btcBalance = 0;
-    const bnbBalance = 0;
-    const ethBalance = 0;
+        // Function to close wallet
+        function closeWallet() {
+            document.getElementById('wallet').style.display = 'none';
+        }
+    </script>
 
-    function formatDelta(amount) {
-      return amount.toFixed(3);
-    }
-    function formatOther(amount) {
-      return amount.toFixed(5);
-    }
-
-    // Update all displayed balances
-    function updateBalances() {
-      balanceDisplay.textContent = 'DELTA: ' + formatDelta(deltaBalance);
-      deltaBalanceDisplay.textContent = formatDelta(deltaBalance);
-      btcBalanceDisplay.textContent = formatOther(btcBalance);
-      bnbBalanceDisplay.textContent = formatOther(bnbBalance);
-      ethBalanceDisplay.textContent = formatOther(ethBalance);
-    }
-
-    updateBalances();
-
-    // Throttle saving DELTA balance
-    let saveTimeout;
-    function scheduleSave() {
-      if (saveTimeout) return;
-      saveTimeout = setTimeout(() => {
-        localStorage.setItem('deltaBalance', deltaBalance.toString());
-        saveTimeout = null;
-      }, 1000);
-    }
-
-    // Tap increments DELTA balance
-    tapButton.addEventListener('click', () => {
-      deltaBalance += 0.001;
-      updateBalances();
-      tapButton.classList.remove('shrink');
-      void tapButton.offsetWidth;
-      tapButton.classList.add('shrink');
-      scheduleSave();
-    });
-
-    // Show wallet modal
-    walletButton.addEventListener('click', () => {
-      walletModal.classList.add('open');
-      walletButton.setAttribute('aria-expanded', 'true');
-      // Trap focus inside wallet modal
-      walletModal.focus();
-    });
-
-    // Close wallet modal
-    walletClose.addEventListener('click', () => {
-      walletModal.classList.remove('open');
-      walletButton.setAttribute('aria-expanded', 'false');
-      walletButton.focus();
-    });
-
-    // Accessibility: close wallet modal on Escape key
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && walletModal.classList.contains('open')) {
-        walletModal.classList.remove('open');
-        walletButton.setAttribute('aria-expanded', 'false');
-        walletButton.focus();
-      }
-    });
-
-    // Save before unload
-    window.addEventListener('beforeunload', () => {
-      localStorage.setItem('deltaBalance', deltaBalance.toString());
-    });
-  })();
-</script>
 </body>
 </html>
-
