@@ -87,6 +87,22 @@
             font-size: 20px;
             margin-top: 20px;
         }
+        #installButton {
+            background-color: #1E90FF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+        #installButton:hover {
+            background-color: #00BFFF;
+        }
     </style>
 </head>
 <body>
@@ -108,9 +124,12 @@
         </div>
     </div>
 
+    <button id="installButton">Install App</button>
+
     <script>
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/worker.js')  // Path to the worker.js file
+            navigator.serviceWorker.register('/worker.js') // Path to worker.js
                 .then((registration) => {
                     console.log('Service Worker registered with scope:', registration.scope);
                 })
@@ -118,8 +137,33 @@
                     console.error('Service Worker registration failed:', error);
                 });
         }
+
         let taps = parseInt(localStorage.getItem('taps')) || 0;
         const deltaPrice = 0.001;
+        let deferredPrompt;
+
+        // Add event listener for the 'beforeinstallprompt' event to show the Install Button
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the default install prompt
+            e.preventDefault();
+            // Save the event for later use
+            deferredPrompt = e;
+            // Show the custom install button
+            document.getElementById('installButton').style.display = 'block';
+
+            document.getElementById('installButton').addEventListener('click', () => {
+                // Show the native install prompt
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tapCount').innerText = `Total Taps: ${taps}`;
