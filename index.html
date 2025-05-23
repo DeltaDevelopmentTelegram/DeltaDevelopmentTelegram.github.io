@@ -1,207 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DELTA Network (Airdrop Eligibility: Confirmed)</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: #fff;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        #tapButton {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: #000;
-            color: #1E90FF;
-            border: 2px solid #1E90FF;
-            font-size: 36px;
-            cursor: pointer;
-            transition: transform 0.25s ease;
-        }
-        #tapButton:hover {
-            background-color: #1E90FF;
-            color: #000;
-        }
-        #walletButton {
-            margin-top: 20px;
-            background-color: #1E90FF;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 18px;
-            border-radius: 5px;
-        }
-        #walletButton:hover {
-            background-color: #00BFFF;
-        }
-        #wallet {
-            display: none;
-            width: 300px;
-            height: 400px;
-            background-color: #111;
-            border: 2px solid #1E90FF;
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 20px;
-            box-sizing: border-box;
-            color: white;
-            font-size: 16px;
-            overflow: hidden;
-        }
-        #closeWallet {
-            background-color: transparent;
-            border: none;
-            color: white;
-            font-size: 24px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-        #closeWallet:hover {
-            color: #FF6347;
-        }
-        .walletHeader {
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
-        #cryptoPrices {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        #deltaAmount {
-            font-size: 20px;
-            color: #1E90FF;
-        }
-        #tapCount {
-            font-size: 20px;
-            margin-top: 20px;
-        }
-        #installButton {
-            background-color: #1E90FF;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-        }
-        #installButton:hover {
-            background-color: #00BFFF;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DELTA Tapping Game with Wallet Connect</title>
+<style>
+  /* Full screen black background with flexbox */
+  html, body {
+    height: 100%;
+    margin: 0;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    -webkit-touch-callout: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+  }
+  /* Container stacking balance, tap button, and wallet connect button */
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  /* Balance text above button */
+  #balance {
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 30px;
+  }
+  /* Larger tapping button styling */
+  button.tap-button {
+    background-color: black;
+    border: 3px solid white;
+    color: white;
+    font-size: 8rem;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    user-select: none;
+
+    /* Remove tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
+  }
+  button.tap-button:focus {
+    outline: none;
+  }
+  button.tap-button:active {
+    background-color: white;
+    color: black;
+    transform: scale(0.93);
+  }
+  /* Connect wallet button styling */
+  button#wallet-connect {
+    margin-top: 35px;
+    background-color: transparent;
+    border: 2px solid white;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.6em 1.8em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    user-select: none;
+  }
+  button#wallet-connect:hover {
+    background-color: white;
+    color: black;
+  }
+  button#wallet-connect:focus {
+    outline: none;
+  }
+  /* Wallet status text */
+  #wallet-status {
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #ccc;
+    font-style: italic;
+  }
+</style>
 </head>
 <body>
+  <div class="game-container">
+    <div id="balance">DELTA: 0.000</div>
+    <button class="tap-button" aria-label="Tap button">&#x2206;</button>
+    <button id="wallet-connect" aria-label="Connect Wallet">Connect Wallet</button>
+    <div id="wallet-status" aria-live="polite"></div>
+  </div>
 
-    <h1>Tap to Mine Delta</h1>
-    
-    <button id="tapButton" onclick="tap()">∆</button>
-    
-    <p id="tapCount">Total Taps: 0</p>
-    
-    <button id="walletButton" onclick="openWallet()">Open Wallet</button>
-    
-    <div id="wallet">
-        <button id="closeWallet" onclick="closeWallet()">X</button>
-        <div class="walletHeader">Wallet</div>
-        <div id="deltaAmount">Delta: 0.0000 USD</div>
-        <div id="cryptoPrices">
-            <p>Loading crypto prices...</p>
-        </div>
-    </div>
+<script>
+  (function() {
+    const button = document.querySelector('.tap-button');
+    const balanceDisplay = document.getElementById('balance');
+    const walletConnectBtn = document.getElementById('wallet-connect');
+    const walletStatus = document.getElementById('wallet-status');
 
-    <button id="installButton">Install App</button>
+    let balance = 0;
 
-    <script>
-        let taps = parseInt(localStorage.getItem('taps')) || 0;
-        const deltaPrice = 0.001;
-        let deferredPrompt;
+    // Load balance from localStorage
+    const saved = localStorage.getItem('delta_balance');
+    if (saved !== null && !isNaN(saved)) {
+      balance = parseFloat(saved);
+    }
 
-        // Add event listener for the 'beforeinstallprompt' event to show the Install Button
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the default install prompt
-            e.preventDefault();
-            // Save the event for later use
-            deferredPrompt = e;
-            // Show the custom install button
-            document.getElementById('installButton').style.display = 'block';
+    function updateBalanceDisplay() {
+      balanceDisplay.textContent = 'DELTA: ' + balance.toFixed(3);
+    }
 
-            document.getElementById('installButton').addEventListener('click', () => {
-                // Show the native install prompt
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the A2HS prompt');
-                    } else {
-                        console.log('User dismissed the A2HS prompt');
-                    }
-                    deferredPrompt = null;
-                });
-            });
-        });
+    updateBalanceDisplay();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('tapCount').innerText = `Total Taps: ${taps}`;
-            document.getElementById('deltaAmount').innerText = `Delta: ${(taps * deltaPrice).toFixed(4)} USD`;
-        });
+    button.addEventListener('click', () => {
+      balance += 0.001;
+      updateBalanceDisplay();
+    });
 
-        async function getCryptoPrices() {
-            try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,pepe,shiba-inu,the-open-network,dogecoin&vs_currencies=usd');
-                if (!response.ok) throw new Error('Failed to fetch crypto prices');
+    button.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        balance += 0.001;
+        updateBalanceDisplay();
+      }
+    });
 
-                const data = await response.json();
-                document.getElementById('cryptoPrices').innerHTML = `
-                    <p>Bitcoin: $${data.bitcoin.usd}</p>
-                    <p>Ethereum: $${data.ethereum.usd}</p>
-                    <p>Binance Coin: $${data.binancecoin.usd}</p>
-                    <p>Pepe Coin: $${data.pepe.usd}</p>
-                    <p>Shiba Inu: $${data['shiba-inu'].usd}</p>
-                    <p>TON (The Open Network): $${data['the-open-network'].usd}</p>
-                    <p>Dogecoin: $${data.dogecoin.usd}</p>
-                `;
-            } catch (error) {
-                console.error('Error fetching crypto prices:', error);
-                document.getElementById('cryptoPrices').innerHTML = `<p>Error loading prices.</p>`;
-            }
+    setInterval(() => {
+      localStorage.setItem('delta_balance', balance.toFixed(6));
+    }, 30);
+
+    // Wallet connection logic
+    async function connectWallet() {
+      if (typeof window.tonkeeper !== 'undefined') {
+        walletStatus.textContent = "Connecting...";
+        try {
+          // Request connection, handle response with wallet info
+          const result = await window.tonkeeper.requestPermissions({permissions: ['tonClient', 'send', 'accountInteraction']});
+          if(result?.account?.address) {
+            walletStatus.textContent = `Connected: ${result.account.address}`;
+            walletConnectBtn.textContent = "Connected";
+            walletConnectBtn.disabled = true;
+          } else {
+            walletStatus.textContent = "Connection failed or no address returned.";
+          }
+        } catch (e) {
+          walletStatus.textContent = 'Connection rejected or error occurred.';
+          console.error(e);
         }
+      } else {
+        walletStatus.textContent = 'TonKeeper wallet not detected. Please install TonKeeper extension or app.';
+      }
+    }
 
-        function tap() {
-            taps += 1;
-            document.getElementById('tapCount').innerText = `Total Taps: ${taps}`;
-            document.getElementById('deltaAmount').innerText = `Delta: ${(taps * deltaPrice).toFixed(4)} USD`;
-
-            const button = document.getElementById('tapButton');
-            button.style.transform = 'scale(0.8)';
-            setTimeout(() => button.style.transform = 'scale(1)', 250);
-        }
-
-        function openWallet() {
-            document.getElementById('wallet').style.display = 'block';
-            getCryptoPrices();
-        }
-
-        function closeWallet() {
-            document.getElementById('wallet').style.display = 'none';
-        }
-
-        setInterval(() => {
-            localStorage.setItem('taps', taps);
-        }, 30);
-    </script>
-
+    walletConnectBtn.addEventListener('click', connectWallet);
+  })();
+</script>
 </body>
 </html>
