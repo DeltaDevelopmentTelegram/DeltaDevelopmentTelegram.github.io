@@ -18,7 +18,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
   }
-  /* Container stacking balance, tap button, and wallet connect button */
+  /* Container stacking balance and tap button */
   .game-container {
     display: flex;
     flex-direction: column;
@@ -30,14 +30,14 @@
     letter-spacing: 0.05em;
     margin-bottom: 30px;
   }
-  /* Larger tapping button styling */
+  /* Smaller tapping button styling */
   button.tap-button {
     background-color: black;
     border: 3px solid white;
     color: white;
-    font-size: 8rem;
-    width: 200px;
-    height: 200px;
+    font-size: 5rem; /* Reduced font size */
+    width: 150px; /* Reduced width */
+    height: 150px; /* Reduced height */
     border-radius: 50%;
     cursor: pointer;
     outline: none;
@@ -58,27 +58,6 @@
     color: black;
     transform: scale(0.93);
   }
-  /* Connect wallet button styling */
-  button#wallet-connect {
-    margin-top: 35px;
-    background-color: transparent;
-    border: 2px solid white;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 600;
-    padding: 0.6em 1.8em;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    user-select: none;
-  }
-  button#wallet-connect:hover {
-    background-color: white;
-    color: black;
-  }
-  button#wallet-connect:focus {
-    outline: none;
-  }
   /* Wallet status text */
   #wallet-status {
     margin-top: 15px;
@@ -92,7 +71,6 @@
   <div class="game-container">
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button" aria-label="Tap button">&#x2206;</button>
-    <button id="wallet-connect" aria-label="Connect Wallet">Connect Wallet</button>
     <div id="wallet-status" aria-live="polite"></div>
   </div>
 
@@ -100,7 +78,6 @@
   (function() {
     const button = document.querySelector('.tap-button');
     const balanceDisplay = document.getElementById('balance');
-    const walletConnectBtn = document.getElementById('wallet-connect');
     const walletStatus = document.getElementById('wallet-status');
 
     let balance = 0;
@@ -134,30 +111,9 @@
       localStorage.setItem('delta_balance', balance.toFixed(6));
     }, 30);
 
-    // Wallet connection logic
-    async function connectWallet() {
-      if (typeof window.tonkeeper !== 'undefined') {
-        walletStatus.textContent = "Connecting...";
-        try {
-          // Request connection, handle response with wallet info
-          const result = await window.tonkeeper.requestPermissions({permissions: ['tonClient', 'send', 'accountInteraction']});
-          if(result?.account?.address) {
-            walletStatus.textContent = `Connected: ${result.account.address}`;
-            walletConnectBtn.textContent = "Connected";
-            walletConnectBtn.disabled = true;
-          } else {
-            walletStatus.textContent = "Connection failed or no address returned.";
-          }
-        } catch (e) {
-          walletStatus.textContent = 'Connection rejected or error occurred.';
-          console.error(e);
-        }
-      } else {
-        walletStatus.textContent = 'TonKeeper wallet not detected. Please install TonKeeper extension or app.';
-      }
-    }
+    // Wallet connection logic (if needed in the future)
+    // You can add wallet connection logic here if required.
 
-    walletConnectBtn.addEventListener('click', connectWallet);
   })();
 </script>
 </body>
