@@ -87,14 +87,14 @@
     updateBalanceDisplay();
 
     button.addEventListener('click', () => {
-      balance += 0.001;
+      balance += 0.0001;
       updateBalanceDisplay();
     });
 
     button.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        balance += 0.001;
+        balance += 0.0001;
         updateBalanceDisplay();
       }
     });
