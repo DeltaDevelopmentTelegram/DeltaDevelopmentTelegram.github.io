@@ -94,7 +94,7 @@
     button.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        balance += 0.0001;
+        balance += 0.01;
         updateBalanceDisplay();
       }
     });
