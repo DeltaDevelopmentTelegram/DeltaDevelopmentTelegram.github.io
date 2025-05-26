@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>DELTA</title>
 <style>
-  /* Full screen black background with flexbox */
   html, body {
     height: 100%;
     margin: 0;
@@ -18,26 +17,23 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
   }
-  /* Container stacking balance and tap button */
   .game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  /* Balance text above button */
   #balance {
     font-size: 2rem;
     letter-spacing: 0.05em;
     margin-bottom: 30px;
   }
-  /* Smaller tapping button styling */
   button.tap-button {
     background-color: black;
     border: 3px solid white;
     color: white;
-    font-size: 5rem; /* Reduced font size */
-    width: 150px; /* Reduced width */
-    height: 150px; /* Reduced height */
+    font-size: 5rem;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     cursor: pointer;
     outline: none;
@@ -46,8 +42,6 @@
     align-items: center;
     transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
     user-select: none;
-
-    /* Remove tap highlight on mobile */
     -webkit-tap-highlight-color: transparent;
   }
   button.tap-button:focus {
@@ -58,7 +52,6 @@
     color: black;
     transform: scale(0.93);
   }
-  /* Wallet status text */
   #wallet-status {
     margin-top: 15px;
     font-size: 1rem;
@@ -82,7 +75,6 @@
 
     let balance = 0;
 
-    // Load balance from localStorage
     const saved = localStorage.getItem('delta_balance');
     if (saved !== null && !isNaN(saved)) {
       balance = parseFloat(saved);
@@ -110,10 +102,6 @@
     setInterval(() => {
       localStorage.setItem('delta_balance', balance.toFixed(6));
     }, 30);
-
-    // Wallet connection logic (if needed in the future)
-    // You can add wallet connection logic here if required.
-
   })();
 </script>
 </body>
