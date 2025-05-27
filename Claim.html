@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>$DELTA Airdrop</title>
+  <script type="module" src="https://cdn.ethers.io/lib/ethers-5.7.2.esm.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #0d1117; color: #fff; text-align: center; padding-top: 50px; }
+    input, button { padding: 10px; margin: 10px; border-radius: 8px; border: none; }
+    input { width: 300px; }
+    button { background: #2b6cb0; color: #fff; cursor: pointer; }
+    button:hover { background: #2c5282; }
+  </style>
+</head>
+<body>
+  <h1>Claim 20 $DELTA</h1>
+  <p>Enter recipient address and click "Send". Only Sepolia gas fee required.</p>
+  <input type="text" id="recipient" placeholder="Recipient Wallet Address" />
+  <br />
+  <button onclick="airdrop()">Send $DELTA</button>
+
+  <script type="module">
+    import { ethers } from "https://cdn.ethers.io/lib/ethers-5.7.2.esm.min.js";
+
+    const tokenAddress = "0x14a3B555D0D29faf47a43bb53648042D64a2eE00"; // Replace with your token address
+    const tokenABI = [
+      "function transfer(address to, uint256 amount) public returns (bool)",
+      "function decimals() view returns (uint8)"
+    ];
+
+    async function airdrop() {
+      const recipient = document.getElementById("recipient").value;
+      if (!ethers.utils.isAddress(recipient)) {
+        alert("Invalid address");
+        return;
+      }
+
+      if (!window.ethereum) {
+        alert("MetaMask not found.");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+
+      const token = new ethers.Contract(tokenAddress, tokenABI, signer);
+      const decimals = await token.decimals();
+      const amount = ethers.utils.parseUnits("20", decimals);
+
+      try {
+        const tx = await token.transfer(recipient, amount);
+        alert("Transaction sent: " + tx.hash);
+      } catch (err) {
+        alert("Error sending transaction: " + (err.reason || err.message));
+      }
+    }
+  </script>
+</body>
+</html>
