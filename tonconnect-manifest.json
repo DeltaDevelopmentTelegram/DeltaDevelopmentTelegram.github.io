@@ -1,5 +1,6 @@
 {
   "manifest_version": "2",
-  "name": "DELTA Network",
-  "url": "https://deltadevelopmenttelegram.github.io/"
+  "name": "DELTA Tap Game",
+  "url": "https://deltadevelopmenttelegram.github.io/",
+  "iconUrl": "https://deltadevelopmenttelegram.github.io/icon.jpg"
 }
