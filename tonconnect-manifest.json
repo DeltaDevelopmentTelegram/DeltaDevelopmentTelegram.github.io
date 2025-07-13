@@ -1,4 +1,5 @@
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: 'https://yourusername.github.io/yourrepo/tonconnect-manifest.json',
-  buttonRootId: 'ton-connect-button'
-});
+{
+  "manifest_version": "2",
+  "name": "DELTA Tap Game",
+  "url": "https://deltadevelopmenttelegram.github.io/"
+}
