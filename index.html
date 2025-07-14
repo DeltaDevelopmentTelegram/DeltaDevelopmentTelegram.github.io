@@ -59,7 +59,7 @@
       color: #ccc;
       font-style: italic;
     }
-    ton-connect-button {
+    #connect-button {
       margin-top: 25px;
     }
   </style>
@@ -70,23 +70,23 @@
     <div id="countdown">Loading countdown...</div>
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button" aria-label="Tap button">&#x2206;</button>
-    <ton-connect-button></ton-connect-button>
+    <div id="connect-button"></div>
     <div id="wallet-status" aria-live="polite"></div>
   </div>
 
   <script>
-    // Initialize TON Connect
-    const tonConnect = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json",
-      buttonRootId: "ton-connect-button"
-    });
+    // Wrap everything in window.onload to ensure DOM is ready
+    window.onload = function () {
+      // TON Connect
+      const tonConnect = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json",
+        buttonRootId: "connect-button"
+      });
 
-    // Tap game & countdown logic
-    (function() {
+      // Tap game logic
       const button = document.querySelector('.tap-button');
       const balanceDisplay = document.getElementById('balance');
       const countdownElement = document.getElementById('countdown');
-
       let balance = 0;
 
       const saved = localStorage.getItem('delta_balance');
@@ -117,7 +117,7 @@
         localStorage.setItem('delta_balance', balance.toFixed(6));
       }, 30);
 
-      // Countdown (100 days from July 14, 2025 1:26 PM PKT = Oct 22, 08:26 UTC)
+      // Countdown (100 days from July 14, 2025 1:26 PM PKT = Oct 22, 2025 at 08:26 UTC)
       const airdropEndDate = new Date('2025-10-22T08:26:00Z');
 
       function updateCountdown() {
@@ -140,7 +140,7 @@
 
       updateCountdown();
       setInterval(updateCountdown, 1000);
-    })();
+    };
   </script>
 </body>
 </html>
