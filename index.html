@@ -75,7 +75,6 @@
   </div>
 
   <script>
-    // Wrap everything in window.onload to ensure DOM is ready
     window.onload = function () {
       // TON Connect
       const tonConnect = new TON_CONNECT_UI.TonConnectUI({
@@ -83,7 +82,7 @@
         buttonRootId: "connect-button"
       });
 
-      // Tap game logic
+      // Game Variables
       const button = document.querySelector('.tap-button');
       const balanceDisplay = document.getElementById('balance');
       const countdownElement = document.getElementById('countdown');
@@ -117,8 +116,16 @@
         localStorage.setItem('delta_balance', balance.toFixed(6));
       }, 30);
 
-      // Countdown (100 days from July 14, 2025 1:26 PM PKT = Oct 22, 2025 at 08:26 UTC)
-      const airdropEndDate = new Date('2025-10-22T08:26:00Z');
+      // Countdown — set to 100 days from first visit
+      let endDate = localStorage.getItem('delta_airdrop_end');
+      if (!endDate) {
+        const now = new Date();
+        now.setUTCDate(now.getUTCDate() + 100); // Add 100 days
+        endDate = now.toISOString();
+        localStorage.setItem('delta_airdrop_end', endDate);
+      }
+
+      const airdropEndDate = new Date(endDate);
 
       function updateCountdown() {
         const now = new Date();
