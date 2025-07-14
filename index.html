@@ -13,7 +13,6 @@
       justify-content: center;
       align-items: center;
       user-select: none;
-      -webkit-touch-callout: none;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: white;
     }
@@ -49,9 +48,6 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    button.tap-button:focus {
-      outline: none;
-    }
     button.tap-button:active {
       background-color: white;
       color: black;
@@ -63,21 +59,32 @@
       color: #ccc;
       font-style: italic;
     }
+    ton-connect-button {
+      margin-top: 25px;
+    }
   </style>
+  <script type="module" src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
   <div class="game-container">
     <div id="countdown">Loading countdown...</div>
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button" aria-label="Tap button">&#x2206;</button>
+    <ton-connect-button></ton-connect-button>
     <div id="wallet-status" aria-live="polite"></div>
   </div>
 
   <script>
+    // Initialize TON Connect
+    const tonConnect = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json",
+      buttonRootId: "ton-connect-button"
+    });
+
+    // Tap game & countdown logic
     (function() {
       const button = document.querySelector('.tap-button');
       const balanceDisplay = document.getElementById('balance');
-      const walletStatus = document.getElementById('wallet-status');
       const countdownElement = document.getElementById('countdown');
 
       let balance = 0;
@@ -110,7 +117,7 @@
         localStorage.setItem('delta_balance', balance.toFixed(6));
       }, 30);
 
-      // Countdown logic: 100 days from July 14, 2025, 1:26 PM PKT
+      // Countdown (100 days from July 14, 2025 1:26 PM PKT = Oct 22, 08:26 UTC)
       const airdropEndDate = new Date('2025-10-22T08:26:00Z');
 
       function updateCountdown() {
@@ -131,8 +138,8 @@
           `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
       }
 
-      updateCountdown(); // Initial run
-      setInterval(updateCountdown, 1000); // Update every second
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
     })();
   </script>
 </body>
