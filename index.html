@@ -21,11 +21,6 @@
       flex-direction: column;
       align-items: center;
     }
-    #countdown {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-      color: #aaa;
-    }
     #balance {
       font-size: 2rem;
       letter-spacing: 0.05em;
@@ -67,7 +62,6 @@
 </head>
 <body>
   <div class="game-container">
-    <div id="countdown">Loading countdown...</div>
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button" aria-label="Tap button">&#x2206;</button>
     <div id="connect-button"></div>
@@ -76,16 +70,14 @@
 
   <script>
     window.onload = function () {
-      // TON Connect
+      // TON Connect button
       const tonConnect = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json",
         buttonRootId: "connect-button"
       });
 
-      // Game Variables
       const button = document.querySelector('.tap-button');
       const balanceDisplay = document.getElementById('balance');
-      const countdownElement = document.getElementById('countdown');
       let balance = 0;
 
       const saved = localStorage.getItem('delta_balance');
@@ -115,38 +107,6 @@
       setInterval(() => {
         localStorage.setItem('delta_balance', balance.toFixed(6));
       }, 30);
-
-      // Countdown — set to 100 days from first visit
-      let endDate = localStorage.getItem('delta_airdrop_end');
-      if (!endDate) {
-        const now = new Date();
-        now.setUTCDate(now.getUTCDate() + 100); // Add 100 days
-        endDate = now.toISOString();
-        localStorage.setItem('delta_airdrop_end', endDate);
-      }
-
-      const airdropEndDate = new Date(endDate);
-
-      function updateCountdown() {
-        const now = new Date();
-        const diff = airdropEndDate - now;
-
-        if (diff <= 0) {
-          countdownElement.textContent = "⏳ Airdrop ended!";
-          return;
-        }
-
-        const seconds = Math.floor(diff / 1000) % 60;
-        const minutes = Math.floor(diff / 1000 / 60) % 60;
-        const hours = Math.floor(diff / 1000 / 60 / 60) % 24;
-        const days = Math.floor(diff / 1000 / 60 / 60 / 24);
-
-        countdownElement.textContent =
-          `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
-      }
-
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
     };
   </script>
 </body>
