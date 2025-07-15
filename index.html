@@ -9,36 +9,77 @@
     html, body {
       height: 100%;
       margin: 0;
-      background: black;
+      background-color: black;
       color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     #balance {
       font-size: 2rem;
       margin-bottom: 20px;
     }
-    button {
-      background: black;
-      border: 2px solid white;
+
+    .tap-button {
+      width: 150px;
+      height: 150px;
+      background-color: black;
+      border: 3px solid white;
       color: white;
-      font-size: 1.2rem;
-      padding: 10px 20px;
-      margin: 10px;
+      font-size: 4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      margin-bottom: 20px;
+      transition: transform 0.1s ease, background-color 0.2s, color 0.2s;
+    }
+
+    .tap-button:active {
+      background-color: white;
+      color: black;
+      transform: scale(0.93);
+    }
+
+    .action-button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: 2px solid white;
+      background: black;
+      color: white;
+      cursor: pointer;
+    }
+
+    #wallet-status {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div id="balance">DELTA: 0.000</div>
-  <button id="tap">&#x2206; Tap</button>
-  <button id="connect">Connect Wallet</button>
-  <button id="withdraw">Withdraw</button>
-  <div id="wallet-status"></div>
+  <div class="game-container">
+    <div id="balance">DELTA: 0.000</div>
+    <div class="tap-button" id="tap">&#x2206;</div>
+
+    <button class="action-button" id="connect">Connect Wallet</button>
+    <button class="action-button" id="withdraw">Withdraw</button>
+    <div id="wallet-status">Not connected</div>
+  </div>
 
   <script>
     const tapBtn = document.getElementById('tap');
@@ -68,18 +109,18 @@
         walletAddress = connector.wallet.account.address;
         walletStatus.textContent = '✅ Connected: ' + walletAddress;
       } catch (e) {
-        walletStatus.textContent = '❌ Connection failed';
+        walletStatus.textContent = '❌ Wallet connection failed.';
       }
     };
 
     withdrawBtn.onclick = async () => {
       if (!walletAddress) {
-        alert('Please connect wallet first');
+        alert('Connect your wallet first.');
         return;
       }
 
       if (balance < 0.5) {
-        alert('You need at least 0.5 DELTA to withdraw');
+        alert('Minimum 0.5 DELTA required to withdraw.');
         return;
       }
 
@@ -109,7 +150,7 @@
         })
       });
 
-      alert('Request sent to admin.');
+      alert('Withdrawal request sent to admin.');
     };
 
     function updateBalanceDisplay() {
