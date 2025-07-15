@@ -54,6 +54,16 @@
     #ton-connect-button {
       margin-top: 30px;
     }
+    #withdraw-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      background-color: #222;
+      border: 2px solid white;
+      color: white;
+      cursor: pointer;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -61,33 +71,37 @@
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button" aria-label="Tap button">&#x2206;</button>
 
-    <!-- TON Connect Button BELOW the tap button -->
+    <!-- TON Connect Button -->
     <div id="ton-connect-button"></div>
+
+    <!-- Withdraw Button -->
+    <button id="withdraw-button">Withdraw</button>
   </div>
 
   <!-- TonConnect SDK -->
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <script>
-    // Initialize TonConnect
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json',
       buttonRootId: 'ton-connect-button',
     });
 
-    // Optional: Log connection status
+    let connectedAddress = null;
+    let hasRequested = false;
+
     tonConnectUI.onStatusChange(wallet => {
       if (wallet) {
-        console.log("Connected:", wallet.account.address);
+        connectedAddress = wallet.account.address;
       } else {
-        console.log("Disconnected");
+        connectedAddress = null;
       }
     });
 
-    // Game Logic
     (function () {
       const button = document.querySelector('.tap-button');
       const balanceDisplay = document.getElementById('balance');
+      const withdrawBtn = document.getElementById('withdraw-button');
       let balance = 0;
 
       const saved = localStorage.getItem('delta_balance');
@@ -97,26 +111,69 @@
 
       function updateBalanceDisplay() {
         balanceDisplay.textContent = 'DELTA: ' + balance.toFixed(3);
+
+        if (balance >= 5 && connectedAddress && !hasRequested) {
+          withdrawBtn.style.display = 'block';
+        } else {
+          withdrawBtn.style.display = 'none';
+        }
       }
 
       updateBalanceDisplay();
 
+      function saveBalance() {
+        localStorage.setItem('delta_balance', balance.toFixed(6));
+      }
+
       button.addEventListener('click', () => {
-        balance += 0.001;
+        balance += 0.1;
         updateBalanceDisplay();
       });
 
       button.addEventListener('keydown', e => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
-          balance += 0.001;
+          balance += 0.1;
           updateBalanceDisplay();
         }
       });
 
-      setInterval(() => {
-        localStorage.setItem('delta_balance', balance.toFixed(6));
-      }, 300);
+      setInterval(saveBalance, 300);
+
+      // Telegram bot integration
+      withdrawBtn.addEventListener('click', () => {
+        if (!connectedAddress || hasRequested) return;
+
+        const botToken = '8064817895:AAEzfPfnCI-vNBZvJGdGqHA3v40o-QJxBRs';
+        const userId = '7454964468';
+        const message = `🚀 Withdrawal Request\nWallet: ${connectedAddress}\nAmount: ${balance.toFixed(3)} DELTA`;
+
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            chat_id: userId,
+            text: message
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) {
+            withdrawBtn.textContent = 'Requested ✅';
+            withdrawBtn.disabled = true;
+            hasRequested = true;
+          } else {
+            console.error('Telegram error:', data);
+            withdrawBtn.textContent = 'Error ❌';
+          }
+        })
+        .catch(error => {
+          console.error('Network error:', error);
+          withdrawBtn.textContent = 'Error ❌';
+        });
+      });
     })();
   </script>
 </body>
