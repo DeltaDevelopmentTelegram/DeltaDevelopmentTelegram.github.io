@@ -1,111 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>DELTA Tap Game</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://unpkg.com/@tonconnect/sdk@latest"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      background-color: black;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-
-    #balance {
-      font-size: 2rem;
-      margin-bottom: 20px;
-    }
-
-    #tap {
-      width: 150px;
-      height: 150px;
-      background: black;
-      border: 3px solid white;
-      color: white;
-      font-size: 4rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    #tap:active {
-      background-color: white;
-      color: black;
-      transform: scale(0.95);
-    }
-
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      background: black;
-      color: white;
-      border: 2px solid white;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    #wallet-status {
-      font-size: 0.9rem;
-      margin-top: 10px;
-      color: #aaa;
-    }
+    html, body { height: 100%; margin:0; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; font-family:sans-serif; }
+    .container { text-align:center; }
+    #balance { font-size:2rem; margin-bottom:20px; }
+    #tap { width:150px; height:150px; border:3px solid white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:4rem; cursor:pointer; margin:0 auto 20px; }
+    #tap:active { background:#fff; color:#000; transform:scale(0.95); }
   </style>
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
-  <div id="balance">DELTA: 0.000</div>
-  <div id="tap">&#x2206;</div>
-  <button id="connect-wallet">Connect Wallet</button>
-  <div id="wallet-status">Not connected</div>
+  <div class="container">
+    <div id="balance">DELTA: 0.000</div>
+    <div id="tap">Δ</div>
+    <div id="ton-connect-button"></div>
+    <div id="wallet-status" style="margin-top:10px;color:#ccc;font-size:0.9rem;">Wallet not connected</div>
+  </div>
 
   <script>
-    const tapButton = document.getElementById("tap");
-    const balanceDisplay = document.getElementById("balance");
-    const connectButton = document.getElementById("connect-wallet");
-    const walletStatus = document.getElementById("wallet-status");
+    const BUNDLE_KEY = 'delta_balance';
+    let balance = parseFloat(localStorage.getItem(BUNDLE_KEY) || 0);
+    const balanceDisplay = document.getElementById('balance');
+    const tapEl = document.getElementById('tap');
+    const statusEl = document.getElementById('wallet-status');
 
-    let balance = parseFloat(localStorage.getItem("delta_balance")) || 0;
-    updateBalanceDisplay();
-
-    tapButton.addEventListener("click", () => {
-      balance += 0.001;
-      localStorage.setItem("delta_balance", balance.toFixed(6));
-      updateBalanceDisplay();
-    });
-
-    function updateBalanceDisplay() {
-      balanceDisplay.textContent = "DELTA: " + balance.toFixed(3);
+    function updateBalance() {
+      balanceDisplay.textContent = 'DELTA: ' + balance.toFixed(3);
     }
+    updateBalance();
 
-    // TonConnect init
-    const connector = new tonconnect.TonConnect({
-      manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json"
+    tapEl.onclick = () => {
+      balance += 0.001;
+      localStorage.setItem(BUNDLE_KEY, balance.toFixed(6));
+      updateBalance();
+    };
+
+    // TonConnect UI
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json',
+      buttonRootId: 'ton-connect-button'
     });
 
-    // Connect wallet
-    connectButton.addEventListener("click", async () => {
-      try {
-        await connector.connectWallet();
-        const wallet = connector.wallet;
-        if (wallet) {
-          walletStatus.textContent = "✅ Connected: " + wallet.account.address;
-        } else {
-          walletStatus.textContent = "❌ Wallet not found.";
-        }
-      } catch (err) {
-        console.error(err);
-        walletStatus.textContent = "❌ Failed to connect.";
-      }
+    tonConnectUI.onStatusChange(wallet => {
+      statusEl.textContent = wallet
+        ? '✅ Connected: ' + wallet.account.address
+        : 'Wallet not connected';
     });
   </script>
 </body>
