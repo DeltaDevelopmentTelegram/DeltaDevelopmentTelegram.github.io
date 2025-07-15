@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>DELTA Tap Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://unpkg.com/@tonconnect/sdk@latest"></script>
+  <script src="https://unpkg.com/@tonconnect/sdk@2.0.0"></script>
   <style>
     html, body {
       height: 100%;
@@ -60,43 +60,62 @@
   <div id="balance">DELTA: 0.000</div>
   <div id="tap">&#x2206;</div>
   <button id="connect-wallet">Connect Wallet</button>
-  <div id="wallet-status">Not connected</div>
+  <div id="wallet-status">🔌 Not connected</div>
 
   <script>
-    const tapButton = document.getElementById("tap");
-    const balanceDisplay = document.getElementById("balance");
-    const connectButton = document.getElementById("connect-wallet");
-    const walletStatus = document.getElementById("wallet-status");
-
+    // Load balance from local storage
     let balance = parseFloat(localStorage.getItem("delta_balance")) || 0;
-    function updateBalanceDisplay() {
+    const balanceDisplay = document.getElementById("balance");
+    const updateBalance = () => {
       balanceDisplay.textContent = "DELTA: " + balance.toFixed(3);
-    }
-    updateBalanceDisplay();
+    };
+    updateBalance();
 
-    tapButton.addEventListener("click", () => {
+    // Tap to earn
+    document.getElementById("tap").addEventListener("click", () => {
       balance += 0.001;
       localStorage.setItem("delta_balance", balance.toFixed(6));
-      updateBalanceDisplay();
+      updateBalance();
     });
 
-    // TonConnect SDK
-    const connector = new tonconnect.TonConnect({
+    // TonConnect SDK Setup
+    const connector = new TonConnectSDK.TonConnect({
       manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json"
     });
 
+    const connectButton = document.getElementById("connect-wallet");
+    const walletStatus = document.getElementById("wallet-status");
+
     connectButton.addEventListener("click", async () => {
       try {
-        await connector.connectWallet();
-        const wallet = connector.wallet;
-        if (wallet && wallet.account) {
-          walletStatus.textContent = "✅ Connected: " + wallet.account.address;
-        } else {
-          walletStatus.textContent = "❌ Wallet not found.";
+        const walletsList = await connector.getWallets();
+        if (walletsList.length === 0) {
+          walletStatus.textContent = "❌ No wallets available";
+          return;
         }
+
+        const walletConnectionSource = {
+          universalLink: walletsList[0].universalLink,
+          bridgeUrl: walletsList[0].bridgeUrl,
+        };
+
+        await connector.connect(walletConnectionSource);
+
+        const address = connector.wallet.account.address;
+        walletStatus.textContent = "✅ Connected: " + address;
+        console.log("Connected wallet:", address);
       } catch (err) {
-        console.error(err);
-        walletStatus.textContent = "❌ Failed to connect.";
+        console.error("Wallet connection failed", err);
+        walletStatus.textContent = "❌ Connection failed";
+      }
+    });
+
+    // Auto update if already connected
+    connector.onStatusChange(wallet => {
+      if (wallet?.account?.address) {
+        walletStatus.textContent = "✅ Connected: " + wallet.account.address;
+      } else {
+        walletStatus.textContent = "🔌 Not connected";
       }
     });
   </script>
