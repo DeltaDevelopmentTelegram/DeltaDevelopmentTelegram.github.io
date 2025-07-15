@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DELTA Network</title>
+  <title>DELTA Tap Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/@tonconnect/sdk@latest"></script>
   <style>
@@ -11,19 +11,12 @@
       margin: 0;
       background-color: black;
       color: white;
+      font-family: sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .game-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     #balance {
@@ -31,10 +24,10 @@
       margin-bottom: 20px;
     }
 
-    .tap-button {
+    #tap {
       width: 150px;
       height: 150px;
-      background-color: black;
+      background: black;
       border: 3px solid white;
       color: white;
       font-size: 4rem;
@@ -44,118 +37,77 @@
       justify-content: center;
       cursor: pointer;
       margin-bottom: 20px;
-      transition: transform 0.1s ease, background-color 0.2s, color 0.2s;
     }
 
-    .tap-button:active {
+    #tap:active {
       background-color: white;
       color: black;
-      transform: scale(0.93);
+      transform: scale(0.95);
     }
 
-    .action-button {
-      margin: 5px;
+    button {
+      margin: 10px;
       padding: 10px 20px;
-      font-size: 1rem;
-      border: 2px solid white;
       background: black;
       color: white;
+      border: 2px solid white;
+      font-size: 1rem;
       cursor: pointer;
     }
 
     #wallet-status {
-      margin-top: 10px;
       font-size: 0.9rem;
-      font-style: italic;
-      color: #ccc;
+      margin-top: 10px;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <div id="balance">DELTA: 0.000</div>
-    <div class="tap-button" id="tap">&#x2206;</div>
-
-    <button class="action-button" id="connect">Connect Wallet</button>
-    <button class="action-button" id="withdraw">Withdraw</button>
-    <div id="wallet-status">Not connected</div>
-  </div>
+  <div id="balance">DELTA: 0.000</div>
+  <div id="tap">&#x2206;</div>
+  <button id="connect-wallet">Connect Wallet</button>
+  <div id="wallet-status">Not connected</div>
 
   <script>
-    const tapBtn = document.getElementById('tap');
-    const connectBtn = document.getElementById('connect');
-    const withdrawBtn = document.getElementById('withdraw');
-    const balanceDisplay = document.getElementById('balance');
-    const walletStatus = document.getElementById('wallet-status');
-
-    let balance = parseFloat(localStorage.getItem('delta_balance')) || 0;
-    let walletAddress = null;
-
+    // Initialize TON Connector
     const connector = new tonconnect.TonConnect();
-    const manifestUrl = 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json';
+    const manifestUrl = "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json";
 
+    // Tap game logic
+    const tapButton = document.getElementById("tap");
+    const balanceDisplay = document.getElementById("balance");
+    const connectButton = document.getElementById("connect-wallet");
+    const walletStatus = document.getElementById("wallet-status");
+
+    let balance = parseFloat(localStorage.getItem("delta_balance")) || 0;
     updateBalanceDisplay();
 
-    tapBtn.onclick = () => {
+    tapButton.addEventListener("click", () => {
       balance += 0.001;
-      localStorage.setItem('delta_balance', balance.toFixed(6));
+      localStorage.setItem("delta_balance", balance.toFixed(6));
       updateBalanceDisplay();
-    };
+    });
 
-    connectBtn.onclick = async () => {
+    function updateBalanceDisplay() {
+      balanceDisplay.textContent = "DELTA: " + balance.toFixed(3);
+    }
+
+    // Wallet connect logic
+    connectButton.addEventListener("click", async () => {
       try {
         await connector.restoreConnection();
         await connector.connectWallet({ manifestUrl });
-        walletAddress = connector.wallet.account.address;
-        walletStatus.textContent = '✅ Connected: ' + walletAddress;
-      } catch (e) {
-        walletStatus.textContent = '❌ Wallet connection failed.';
+        const wallet = connector.wallet;
+        if (wallet) {
+          walletStatus.textContent = "✅ Connected: " + wallet.account.address;
+        } else {
+          walletStatus.textContent = "❌ Wallet not found.";
+        }
+      } catch (err) {
+        console.error(err);
+        walletStatus.textContent = "❌ Failed to connect.";
       }
-    };
-
-    withdrawBtn.onclick = async () => {
-      if (!walletAddress) {
-        alert('Connect your wallet first.');
-        return;
-      }
-
-      if (balance < 0.5) {
-        alert('Minimum 0.5 DELTA required to withdraw.');
-        return;
-      }
-
-      const message = `🔔 Withdrawal Request:\n\n👛 Address: <code>${walletAddress}</code>\n💰 Amount: ${balance.toFixed(3)} DELTA`;
-
-      await fetch(`https://api.telegram.org/bot8064817895:AAEzfPfnCI-vNBZvJGdGqHA3v40o-QJxBRs/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: '7454964468',
-          text: message,
-          parse_mode: 'HTML',
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '✅ Accept',
-                  callback_data: `accept_${walletAddress}_${balance.toFixed(3)}`
-                },
-                {
-                  text: '❌ Decline',
-                  callback_data: `decline_${walletAddress}_${balance.toFixed(3)}`
-                }
-              ]
-            ]
-          }
-        })
-      });
-
-      alert('Withdrawal request sent to admin.');
-    };
-
-    function updateBalanceDisplay() {
-      balanceDisplay.textContent = 'DELTA: ' + balance.toFixed(3);
-    }
+    });
   </script>
 </body>
 </html>
