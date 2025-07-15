@@ -55,11 +55,33 @@
 </head>
 <body>
   <div class="game-container">
+    <!-- TON Connect Button -->
+    <div id="ton-connect-button" style="margin-bottom: 20px;"></div>
+
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button" aria-label="Tap button">&#x2206;</button>
   </div>
 
+  <!-- TonConnect SDK -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
   <script>
+    // Initialize TonConnect
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json',
+      buttonRootId: 'ton-connect-button',
+    });
+
+    // Optional: Log connection status
+    tonConnectUI.onStatusChange(wallet => {
+      if (wallet) {
+        console.log("Connected:", wallet.account.address);
+      } else {
+        console.log("Disconnected");
+      }
+    });
+
+    // Game Logic
     (function () {
       const button = document.querySelector('.tap-button');
       const balanceDisplay = document.getElementById('balance');
