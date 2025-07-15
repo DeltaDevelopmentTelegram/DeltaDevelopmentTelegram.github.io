@@ -69,11 +69,6 @@
   <div id="wallet-status">Not connected</div>
 
   <script>
-    // Initialize TON Connector
-    const connector = new tonconnect.TonConnect();
-    const manifestUrl = "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json";
-
-    // Tap game logic
     const tapButton = document.getElementById("tap");
     const balanceDisplay = document.getElementById("balance");
     const connectButton = document.getElementById("connect-wallet");
@@ -92,11 +87,15 @@
       balanceDisplay.textContent = "DELTA: " + balance.toFixed(3);
     }
 
-    // Wallet connect logic
+    // TonConnect init
+    const connector = new tonconnect.TonConnect({
+      manifestUrl: "https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json"
+    });
+
+    // Connect wallet
     connectButton.addEventListener("click", async () => {
       try {
-        await connector.restoreConnection();
-        await connector.connectWallet({ manifestUrl });
+        await connector.connectWallet();
         const wallet = connector.wallet;
         if (wallet) {
           walletStatus.textContent = "✅ Connected: " + wallet.account.address;
