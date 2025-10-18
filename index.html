@@ -47,7 +47,7 @@
       color: black;
       transform: scale(0.93);
     }
-    ton-connect {
+    #ton-connect {
       margin-top: 20px;
     }
   </style>
@@ -56,7 +56,7 @@
   <div class="game-container">
     <div id="balance">DELTA: 0.000</div>
     <button class="tap-button">&#x2206;</button>
-    <ton-connect manifestUrl="https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json"></ton-connect>
+    <div id="ton-connect"></div>
   </div>
 
   <script>
@@ -64,8 +64,9 @@
     const balanceDisplay = document.getElementById('balance');
     let balance = 0;
 
+    // Load saved balance safely
     const saved = localStorage.getItem('delta_balance');
-    if (saved !== null && !isNaN(saved)) {
+    if (saved && !isNaN(parseFloat(saved))) {
       balance = parseFloat(saved);
     }
 
@@ -75,12 +76,14 @@
 
     updateBalanceDisplay();
 
+    // Increase balance on click
     button.addEventListener('click', () => {
       balance += 0.1;
       updateBalanceDisplay();
     });
 
-    button.addEventListener('keydown', e => {
+    // Increase balance with keyboard (Space or Enter)
+    document.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         balance += 0.1;
@@ -88,15 +91,17 @@
       }
     });
 
+    // Save to localStorage every 0.3s
     setInterval(() => {
       localStorage.setItem('delta_balance', balance.toFixed(6));
     }, 300);
 
-    // Optional: TonConnect (still here for wallet connection)
-    const tonConnect = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json',
-      buttonRootId: 'ton-connect',
+    // ✅ TonConnect initialization (working)
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json'
     });
+
+    tonConnectUI.renderButton('#ton-connect');
   </script>
 </body>
 </html>
