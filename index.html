@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DELTA Network</title>
+  <title>DELTA Tap 2.0</title>
   <script src="https://unpkg.com/@tonconnect/ui@latest"></script>
   <style>
     html, body {
@@ -16,91 +16,118 @@
       user-select: none;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: white;
+      overflow: hidden;
     }
     .game-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 25px;
+      text-align: center;
     }
     #balance {
       font-size: 2rem;
       letter-spacing: 0.05em;
-      margin-bottom: 10px;
       transition: all 0.2s ease;
+      color: #00ffae;
+      text-shadow: 0 0 10px #00ffae;
     }
     button.tap-button {
-      background-color: black;
-      border: 3px solid white;
-      color: white;
+      background-color: #000;
+      border: 3px solid #00ffae;
+      color: #00ffae;
       font-size: 5rem;
-      width: 150px;
-      height: 150px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
       cursor: pointer;
       outline: none;
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 0 25px #00ffae66;
+      transition: transform 0.1s ease, box-shadow 0.2s ease, background-color 0.15s ease;
     }
     button.tap-button:active {
-      background-color: white;
+      transform: scale(0.9);
+      background-color: #00ffae;
       color: black;
-      transform: scale(0.93);
+      box-shadow: 0 0 40px #00ffae;
     }
     #ton-connect {
       margin-top: 20px;
+    }
+    .delta-logo {
+      font-size: 3rem;
+      color: #00ffae;
+      text-shadow: 0 0 20px #00ffae, 0 0 40px #00ffae;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
   <div class="game-container">
+    <div class="delta-logo">Δ DELTA Network</div>
     <div id="balance">DELTA: 0.000</div>
-    <button class="tap-button">&#x2206;</button>
+    <button class="tap-button">Δ</button>
     <div id="ton-connect"></div>
   </div>
 
   <script>
-    // --- Elements ---
     const button = document.querySelector('.tap-button');
     const balanceDisplay = document.getElementById('balance');
-
-    // --- Balance setup ---
     let balance = 0;
+
+    // Load balance
     const saved = localStorage.getItem('delta_balance');
     if (saved && !isNaN(parseFloat(saved))) {
       balance = parseFloat(saved);
     }
 
-    // --- Display function ---
+    // Update balance text
     function updateBalanceDisplay() {
       balanceDisplay.textContent = `DELTA: ${balance.toFixed(3)}`;
     }
 
     updateBalanceDisplay();
 
-    // --- On click increment ---
-    button.addEventListener('click', () => {
-      balance += 0.1;
+    // Tap logic
+    function addDelta(amount) {
+      balance += amount;
       updateBalanceDisplay();
-    });
 
-    // --- Keyboard click (space or enter) ---
+      // Small popup animation
+      const popup = document.createElement('div');
+      popup.textContent = '+0.1';
+      popup.style.position = 'absolute';
+      popup.style.left = `${Math.random() * window.innerWidth}px`;
+      popup.style.top = `${Math.random() * window.innerHeight}px`;
+      popup.style.color = '#00ffae';
+      popup.style.opacity = '1';
+      popup.style.transition = 'all 1s ease';
+      document.body.appendChild(popup);
+
+      setTimeout(() => {
+        popup.style.opacity = '0';
+        popup.style.transform = 'translateY(-30px)';
+      }, 50);
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    button.addEventListener('click', () => addDelta(0.1));
     document.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        balance += 0.1;
-        updateBalanceDisplay();
+        addDelta(0.1);
       }
     });
 
-    // --- Auto-save ---
+    // Auto-save
     setInterval(() => {
       localStorage.setItem('delta_balance', balance.toFixed(6));
     }, 500);
 
-    // --- TON Connect ---
+    // TON Connect
     window.addEventListener('DOMContentLoaded', () => {
       const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json'
