@@ -71,71 +71,71 @@
   <div class="container">
     <h1>💠 DELTA Miner</h1>
     <div id="balance">DELTA: 0.000</div>
-    <button class="tap-button">⛏️</button>
+    <button class="tap-button" id="tapBtn">⛏️</button>
     <div id="ton-connect"></div>
   </div>
 
   <script>
-    // --- Elements ---
-    const button = document.querySelector('.tap-button');
-    const balanceDisplay = document.getElementById('balance');
-    let balance = 0;
+    window.addEventListener("DOMContentLoaded", () => {
+      const button = document.getElementById('tapBtn');
+      const balanceDisplay = document.getElementById('balance');
+      let balance = 0;
 
-    // --- Load shared balance ---
-    const saved = localStorage.getItem('delta_balance');
-    if (saved && !isNaN(parseFloat(saved))) {
-      balance = parseFloat(saved);
-    }
+      // Load shared DELTA balance
+      const saved = localStorage.getItem('delta_balance');
+      if (saved && !isNaN(parseFloat(saved))) {
+        balance = parseFloat(saved);
+      }
 
-    function updateBalanceDisplay() {
-      balanceDisplay.textContent = `DELTA: ${balance.toFixed(3)}`;
-    }
+      function updateBalanceDisplay() {
+        balanceDisplay.textContent = `DELTA: ${balance.toFixed(3)}`;
+      }
 
-    updateBalanceDisplay();
-
-    // --- Click behavior ---
-    function addDelta(amount, x, y) {
-      balance += amount;
       updateBalanceDisplay();
 
-      // Floating "+0.1" animation
-      const particle = document.createElement('div');
-      particle.className = 'particle';
-      particle.textContent = '+0.1';
-      particle.style.left = x + 'px';
-      particle.style.top = y + 'px';
-      document.body.appendChild(particle);
+      // Tap logic
+      function addDelta(amount, x, y) {
+        balance += amount;
+        updateBalanceDisplay();
 
-      requestAnimationFrame(() => {
-        particle.style.transform = 'translateY(-40px)';
-        particle.style.opacity = '0';
+        // Floating +0.1 text
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = '+0.1';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        document.body.appendChild(particle);
+
+        requestAnimationFrame(() => {
+          particle.style.transform = 'translateY(-40px)';
+          particle.style.opacity = '0';
+        });
+
+        setTimeout(() => particle.remove(), 1000);
+      }
+
+      // Add click listener after DOM load
+      button.addEventListener('click', e => {
+        const rect = button.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top;
+        addDelta(0.1, x, y);
       });
 
-      setTimeout(() => particle.remove(), 1000);
-    }
+      // Add keyboard tap support
+      document.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          addDelta(0.1, window.innerWidth / 2, window.innerHeight / 2);
+        }
+      });
 
-    button.addEventListener('click', e => {
-      const rect = button.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top;
-      addDelta(0.1, x, y);
-    });
+      // Auto save shared balance
+      setInterval(() => {
+        localStorage.setItem('delta_balance', balance.toFixed(6));
+      }, 500);
 
-    // --- Keyboard tap support ---
-    document.addEventListener('keydown', e => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        addDelta(0.1, window.innerWidth / 2, window.innerHeight / 2);
-      }
-    });
-
-    // --- Auto save shared balance ---
-    setInterval(() => {
-      localStorage.setItem('delta_balance', balance.toFixed(6));
-    }, 500);
-
-    // --- TonConnect Integration ---
-    window.addEventListener('DOMContentLoaded', () => {
+      // ✅ TonConnect Init (after DOM ready)
       const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json'
       });
