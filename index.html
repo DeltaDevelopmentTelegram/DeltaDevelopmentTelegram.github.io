@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DELTA Tap 2.0</title>
+  <title>DELTA Miner</title>
   <script src="https://unpkg.com/@tonconnect/ui@latest"></script>
   <style>
     html, body {
       height: 100%;
       margin: 0;
-      background-color: #000;
+      background: radial-gradient(circle at center, #001f1f 0%, #000 100%);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -18,116 +18,123 @@
       color: white;
       overflow: hidden;
     }
-    .game-container {
+    .container {
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 25px;
-      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: #00ffae;
+      text-shadow: 0 0 20px #00ffae, 0 0 40px #00ffae;
+      margin: 0;
     }
     #balance {
-      font-size: 2rem;
-      letter-spacing: 0.05em;
-      transition: all 0.2s ease;
-      color: #00ffae;
-      text-shadow: 0 0 10px #00ffae;
+      font-size: 1.8rem;
+      color: #00ffe1;
+      text-shadow: 0 0 8px #00ffe1;
     }
     button.tap-button {
-      background-color: #000;
+      background: #000;
       border: 3px solid #00ffae;
       color: #00ffae;
-      font-size: 5rem;
-      width: 180px;
-      height: 180px;
+      font-size: 4.5rem;
+      width: 160px;
+      height: 160px;
       border-radius: 50%;
       cursor: pointer;
-      outline: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 25px #00ffae66;
+      box-shadow: 0 0 20px #00ffae66;
       transition: transform 0.1s ease, box-shadow 0.2s ease, background-color 0.15s ease;
     }
     button.tap-button:active {
       transform: scale(0.9);
-      background-color: #00ffae;
-      color: black;
-      box-shadow: 0 0 40px #00ffae;
+      background: #00ffae;
+      color: #000;
+      box-shadow: 0 0 30px #00ffae;
     }
     #ton-connect {
       margin-top: 20px;
     }
-    .delta-logo {
-      font-size: 3rem;
+    .particle {
+      position: absolute;
+      font-size: 1.2rem;
       color: #00ffae;
-      text-shadow: 0 0 20px #00ffae, 0 0 40px #00ffae;
-      margin-bottom: 10px;
+      pointer-events: none;
+      opacity: 1;
+      transition: transform 1s ease, opacity 1s ease;
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="delta-logo">Δ DELTA Network</div>
+  <div class="container">
+    <h1>💠 DELTA Miner</h1>
     <div id="balance">DELTA: 0.000</div>
-    <button class="tap-button">Δ</button>
+    <button class="tap-button">⛏️</button>
     <div id="ton-connect"></div>
   </div>
 
   <script>
+    // --- Elements ---
     const button = document.querySelector('.tap-button');
     const balanceDisplay = document.getElementById('balance');
     let balance = 0;
 
-    // Load balance
+    // --- Load shared balance ---
     const saved = localStorage.getItem('delta_balance');
     if (saved && !isNaN(parseFloat(saved))) {
       balance = parseFloat(saved);
     }
 
-    // Update balance text
     function updateBalanceDisplay() {
       balanceDisplay.textContent = `DELTA: ${balance.toFixed(3)}`;
     }
 
     updateBalanceDisplay();
 
-    // Tap logic
-    function addDelta(amount) {
+    // --- Click behavior ---
+    function addDelta(amount, x, y) {
       balance += amount;
       updateBalanceDisplay();
 
-      // Small popup animation
-      const popup = document.createElement('div');
-      popup.textContent = '+0.1';
-      popup.style.position = 'absolute';
-      popup.style.left = `${Math.random() * window.innerWidth}px`;
-      popup.style.top = `${Math.random() * window.innerHeight}px`;
-      popup.style.color = '#00ffae';
-      popup.style.opacity = '1';
-      popup.style.transition = 'all 1s ease';
-      document.body.appendChild(popup);
+      // Floating "+0.1" animation
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.textContent = '+0.1';
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      document.body.appendChild(particle);
 
-      setTimeout(() => {
-        popup.style.opacity = '0';
-        popup.style.transform = 'translateY(-30px)';
-      }, 50);
-      setTimeout(() => popup.remove(), 1000);
+      requestAnimationFrame(() => {
+        particle.style.transform = 'translateY(-40px)';
+        particle.style.opacity = '0';
+      });
+
+      setTimeout(() => particle.remove(), 1000);
     }
 
-    button.addEventListener('click', () => addDelta(0.1));
+    button.addEventListener('click', e => {
+      const rect = button.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top;
+      addDelta(0.1, x, y);
+    });
+
+    // --- Keyboard tap support ---
     document.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        addDelta(0.1);
+        addDelta(0.1, window.innerWidth / 2, window.innerHeight / 2);
       }
     });
 
-    // Auto-save
+    // --- Auto save shared balance ---
     setInterval(() => {
       localStorage.setItem('delta_balance', balance.toFixed(6));
     }, 500);
 
-    // TON Connect
+    // --- TonConnect Integration ---
     window.addEventListener('DOMContentLoaded', () => {
       const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json'
