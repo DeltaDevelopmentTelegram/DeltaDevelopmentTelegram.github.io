@@ -9,7 +9,7 @@
     html, body {
       height: 100%;
       margin: 0;
-      background-color: black;
+      background-color: #000;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -21,11 +21,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 25px;
     }
     #balance {
       font-size: 2rem;
       letter-spacing: 0.05em;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
     }
     button.tap-button {
       background-color: black;
@@ -60,29 +62,31 @@
   </div>
 
   <script>
+    // --- Elements ---
     const button = document.querySelector('.tap-button');
     const balanceDisplay = document.getElementById('balance');
-    let balance = 0;
 
-    // Load saved balance safely
+    // --- Balance setup ---
+    let balance = 0;
     const saved = localStorage.getItem('delta_balance');
     if (saved && !isNaN(parseFloat(saved))) {
       balance = parseFloat(saved);
     }
 
+    // --- Display function ---
     function updateBalanceDisplay() {
-      balanceDisplay.textContent = 'DELTA: ' + balance.toFixed(3);
+      balanceDisplay.textContent = `DELTA: ${balance.toFixed(3)}`;
     }
 
     updateBalanceDisplay();
 
-    // Increase balance on click
+    // --- On click increment ---
     button.addEventListener('click', () => {
       balance += 0.1;
       updateBalanceDisplay();
     });
 
-    // Increase balance with keyboard (Space or Enter)
+    // --- Keyboard click (space or enter) ---
     document.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
@@ -91,17 +95,18 @@
       }
     });
 
-    // Save to localStorage every 0.3s
+    // --- Auto-save ---
     setInterval(() => {
       localStorage.setItem('delta_balance', balance.toFixed(6));
-    }, 300);
+    }, 500);
 
-    // ✅ TonConnect initialization (working)
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json'
+    // --- TON Connect ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://deltadevelopmenttelegram.github.io/tonconnect-manifest.json'
+      });
+      tonConnectUI.renderButton('#ton-connect');
     });
-
-    tonConnectUI.renderButton('#ton-connect');
   </script>
 </body>
 </html>
